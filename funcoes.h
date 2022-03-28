@@ -1,0 +1,2 @@
+
+Sistema_Linear *lerSistema();
