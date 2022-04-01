@@ -8,6 +8,7 @@
 
 int main(int argc, char const *argv[]){
   Sistema_Linear *SL;
+  SistemaL_Convertido *Novo_SL;
   SL = NULL;
   int i=0;
   int temarq=0;
@@ -16,16 +17,21 @@ int main(int argc, char const *argv[]){
     temarq=1;
   }
  
-  //while (SL = lerSistema()) {
-  /*  scanf("%s",SL->Funcao);
+  while (SL = lerSistema()) {
+    printf("entrou while\n");
+    Novo_SL = converteMatriz(SL);
+    printf("finalizous\n");
+
+  /*scanf("%s",SL->Funcao);
     scanf("%lf",SL->Ap_inicial);
     scanf("%Lg",SL->Tole_epsilon);
-    scanf("%lf",SL->Max_interacao);
+    scanf("%lf",SL->Max_interacao);*/
     printf("%d\n",SL->Qnt_variaveis);
     printf("%s\n",SL->Funcao);
     printf("%lf\n",*SL->Ap_inicial);
     printf("%Lg\n",*SL->Tole_epsilon);
-    printf("%lf\n",*SL->Max_interacao);*/
-  
-  //}
+    printf("%lf\n",*SL->Max_interacao);
+    
+  }
+  printf("saiu laço\n");
 }
