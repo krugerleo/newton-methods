@@ -10,7 +10,7 @@
 %.o: %.c
 	$(CC) -c $(CFLAGS) $<
 
-$(PROG):  $(OBJS) teste.o
+$(PROG):  $(OBJS) testeentrada.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 clean:
