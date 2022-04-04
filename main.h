@@ -1,3 +1,5 @@
+#ifndef ENTRADA_H
+#define ENTRADA_H
 
 typedef struct {
     int Qnt_variaveis;
@@ -13,4 +15,4 @@ typedef struct {
     double **Mcoeficientes;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
     double *Termos_Independentes;  
 } SistemaL_Convertido;
-
+#endif
