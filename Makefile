@@ -1,22 +1,17 @@
-    CC     = gcc -g
-    CFLAGS = -g -std=c11
-    LFLAGS = -Wl,-rpath -Wl, -lm
+parametrosCompilacao=-Wall -lpthread
+nomeAula=NewtonPC
 
-    PROG = teste
-    OBJS = funcoes.o testeentrada.o
+all: $(nomeAula)
 
-.PHONY: clean purge all
+$(nomeAula): main.o funcoes.o 
+	gcc -o $(nomeAula) main.o funcoes.o -I/usr/local/include -L/usr/local/lib -lmatheval $(parametrosCompilacao)
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $<
 
-$(PROG):  $(OBJS) testeentrada.o
-	$(CC) -o $@ $^ $(LFLAGS)
+funcoes.o: funcoes.h funcoes.c
+	gcc -c funcoes.c $(parametrosCompilacao)
+
+testeentrada.o: main.h main.c
+	gcc -c main.c $(parametrosCompilacao)
 
 clean:
-	@rm -f *~ *.bak
-
-purge:   clean
-	@rm -rf bin obj *.layout *.depend
-	@rm -f *.o core a.out
-	@rm -f $(PROG)
+	rm -f *.o *.gch $(nomeAula)
