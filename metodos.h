@@ -1,5 +1,5 @@
-#ifndef METODO_H
-#define METODO_H
+#ifndef METODOS_H
+#define METODOS_H
 
 double calculaNorma(double *X,int n);
 

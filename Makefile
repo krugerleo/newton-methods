@@ -1,16 +1,22 @@
 parametrosCompilacao=-Wall -lpthread
-nomeAula=NewtonPC
+nomeAula=newtonMethdods
 
 all: $(nomeAula)
 
-$(nomeAula): main.o funcoes.o 
-	gcc -o $(nomeAula) main.o funcoes.o -I/usr/local/include -L/usr/local/lib -lmatheval $(parametrosCompilacao)
+$(nomeAula): main.o dados.o sistema.o
+	gcc -o $(nomeAula) main.o dados.o sistema.o -I/usr/local/include -L/usr/local/lib -lmatheval $(parametrosCompilacao)
 
 
-funcoes.o: funcoes.h funcoes.c
-	gcc -c funcoes.c $(parametrosCompilacao)
+dados.o: dados.h dados.c
+	gcc -c dados.c $(parametrosCompilacao)
 
-testeentrada.o: main.h main.c
+sistema.o: sistema.h sistema.c
+	gcc -c sistema.c $(parametrosCompilacao)
+
+# metodos.o: metodos.h metodos.c
+# 	gcc -c metodos.c $(parametrosCompilacao)
+
+main.o: main.c
 	gcc -c main.c $(parametrosCompilacao)
 
 clean:

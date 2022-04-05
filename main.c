@@ -1,34 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "sistema.h"
-#include "funcoes.h"
-#include <matheval.h>
 #include <assert.h>
-#include "metodo.h"
-
-#ifdef DEBUG
-# define DEBUG_PRINT(x) printf x
-#else
-# define DEBUG_PRINT(x) do {} while (0)
-#endif
-
-
+#include "dados.h"
+#include "sistema.h"
+#include "metodos.h"
 
 int main(int argc, char const *argv[]){
-  Dados_Entrada *DE;
-  SistemaL *Novo_DE;
-  DE = NULL;
-  int i=0;
-  int temarq=0;
-  int teste;
-  if(argv[1]!= NULL){
-    temarq=1;
-  }
- 
-  while (DE = lerDados()) {
+  DadosE *dadosEntrada;
+  SistemaL *sistemaLinear;
+  dadosEntrada = NULL;
 
-    Novo_DE = converteMatriz(DE);
-    free(DE);
+//  If for saida padrão ou arquivo especificado
+//  int temarq=0;
+//  if(argv[1]!= NULL){
+//    temarq=1;
+//  }
+ 
+  while ( (dadosEntrada = lerDados()) ) {
+    imprimeDados(dadosEntrada);
+    sistemaLinear = criaSistemaLinear(dadosEntrada);
+    free(dadosEntrada);
+    free(sistemaLinear);
   }
-  printf("finalizou\n");
+
+  printf("\nFinalizou graciosamente\n");
+  return 0;
+
 }
