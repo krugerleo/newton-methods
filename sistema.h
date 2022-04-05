@@ -4,7 +4,7 @@
 typedef struct {
     int dimensao;   // dimensão do SL
     double *vtrVariaveis;        // vetor nxn de posições da matriz
-    void **matrizCoeficientes;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
+    double **matrizCoeficientes;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
     double *termosIndependentes;
 } SistemaL;
 

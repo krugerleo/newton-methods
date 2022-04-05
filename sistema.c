@@ -10,7 +10,7 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
     SL->dimensao = n;
     SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
-    SL->matrizCoeficientes = NULL; // como alocar?
+    SL->matrizCoeficientes = (double **)malloc((sizeof(double **)*n*n));
     SL->termosIndependentes = (double *)malloc((sizeof(double *)*n));
     return SL;
 }
@@ -44,8 +44,8 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     void *(*A)[count] = malloc(sizeof(int[count][count]));
     for(int i = 0; i < count; i++){
         for(int j = 0; j < count; j++){
+            // derivada segunda
             A[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
-            printf("Deriva 2 i:%d j:%d == %s",i,j,evaluator_get_string(A[i][j]));
         }
         
     }
