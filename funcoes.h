@@ -1,10 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
-SistemaL_Convertido *alocaSistemaLConvertido(unsigned int n);
+SistemaL *alocaSistemaLConvertido(unsigned int n);
 
-SistemaL_Convertido *converteMatriz(Sistema_Linear *SL);
+SistemaL *converteMatriz(Dados_Entrada *DE);
 
-Sistema_Linear *lerSistema();
+Dados_Entrada *lerDados();
 
-Sistema_Linear *alocaSistemaLinear(unsigned int n);
+Dados_Entrada *alocaDados(unsigned int n);
+
+void imprimeDados();
 #endif

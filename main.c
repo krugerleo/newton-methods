@@ -1,16 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.h"
+#include "sistema.h"
 #include "funcoes.h"
 #include <matheval.h>
 #include <assert.h>
-#define ncaracteres  1000
+#include "metodo.h"
+
+#ifdef DEBUG
+# define DEBUG_PRINT(x) printf x
+#else
+# define DEBUG_PRINT(x) do {} while (0)
+#endif
+
 
 
 int main(int argc, char const *argv[]){
-  Sistema_Linear *SL;
-  SistemaL_Convertido *Novo_SL;
-  SL = NULL;
+  Dados_Entrada *DE;
+  SistemaL *Novo_DE;
+  DE = NULL;
   int i=0;
   int temarq=0;
   int teste;
@@ -18,12 +25,10 @@ int main(int argc, char const *argv[]){
     temarq=1;
   }
  
-  while (SL = lerSistema()) {
+  while (DE = lerDados()) {
 
-    Novo_SL = converteMatriz(SL);
-
-    
-    free(SL);
+    Novo_DE = converteMatriz(DE);
+    free(DE);
   }
   printf("finalizou\n");
 }
