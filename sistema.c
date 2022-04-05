@@ -15,18 +15,20 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     return SL;
 }
 SistemaL *criaSistemaLinear(DadosE *DE){
+
     char **nomesVariaveis;
     int count;
     SistemaL *sistemaLinear = NULL;
-    sistemaLinear = alocaSistemaLinear(DE->Qnt_variaveis);
-
+    sistemaLinear = alocaSistemaLinear(DE->Qnt_variaveis);    
     nomesVariaveis=(char **)malloc((sizeof(char **)*DE->Qnt_variaveis*4));
+    // First value to vector
     for(int i = 0; i < DE->Qnt_variaveis; ++i){
         sistemaLinear->vtrVariaveis[i]=DE->Ap_inicial[i];
     }
-    
+    // create evaluator
     void *f = evaluator_create(DE->Funcao);
     assert (f);
+    // Get nomes variaveis with matheval
     evaluator_get_variables (f, &nomesVariaveis,&count);
     
     
@@ -49,15 +51,6 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         }
         
     }
-    /*
-    void *derivadas;
-    passar apinicial -> M 
-    names=pega os nomes
-    for
-      derivadas[i] = evalue_derivada(names,DE->fucao)
-    
-
-    */
 
     return sistemaLinear;
 }
