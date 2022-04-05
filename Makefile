@@ -1,4 +1,4 @@
-parametrosCompilacao=-Wall -lpthread
+parametrosCompilacao=
 nomeAula=newtonMethdods
 
 all: $(nomeAula)

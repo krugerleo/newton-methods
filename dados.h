@@ -1,6 +1,8 @@
 #ifndef DADOSENTRADA_H
 #define DADOSENTRADA_H
 
+#define ncaracteres  1000
+
 typedef struct {
     int Qnt_variaveis;
     char *Funcao;

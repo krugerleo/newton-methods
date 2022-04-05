@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "dados.h"
 
-#define ncaracteres  1000
+
 
 DadosE *alocaDados(unsigned int n){
 
