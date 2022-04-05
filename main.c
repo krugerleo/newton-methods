@@ -17,7 +17,6 @@ int main(int argc, char const *argv[]){
 //  }
  
   while ( (dadosEntrada = lerDados()) ) {
-    imprimeDados(dadosEntrada);
     sistemaLinear = criaSistemaLinear(dadosEntrada);
     free(dadosEntrada);
     free(sistemaLinear);

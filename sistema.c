@@ -10,7 +10,8 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
     SL->dimensao = n;
     SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
-    SL->matrizCoeficientes = (double **)malloc((sizeof(double **)*n*n));
+    printf("%ld",(void***)(sizeof(void *)*n*n));
+    SL->matrizCoeficientes = (double **)malloc( sizeof(double*[n]) );// NÃO ESTA FUNCIONANDO
     SL->termosIndependentes = (double *)malloc((sizeof(double *)*n));
     return SL;
 }
@@ -43,11 +44,17 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
     // Cria matriz Hess
-    void *(*A)[count] = malloc(sizeof(int[count][count]));
+    // void *(*A)[count] = malloc(sizeof(int[count][count]));
+    
     for(int i = 0; i < count; i++){
         for(int j = 0; j < count; j++){
+            // ###### PRINT DEBUG, IMPRIME ENDEREÇOS MAS ESTÁ ESTRANHO
+            printf("\n%p,[%d][%d]\n",&sistemaLinear->matrizCoeficientes[i][j],i,j );
+            // ###### SEG FAULT QUANDO TENTA INSERIR O VALOR
+            sistemaLinear->matrizCoeficientes[i][j]=0.0;
             // derivada segunda
-            A[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
+            // sistemaLinear->matrizCoeficientes[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
+            // printf("\n%s\n",evaluator_get_string(A[i][j]));
         }
         
     }
