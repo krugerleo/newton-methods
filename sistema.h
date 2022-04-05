@@ -2,10 +2,10 @@
 #define SISTEMA_H
 
 typedef struct {
-    int Dimensao;   // dimensão do SL
-    double *VetorM;        // vetor nxn de posições da matriz
-    double **Mcoeficientes;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
-    double *Termos_Independentes;
+    int dimensao;   // dimensão do SL
+    double *vtrVariaveis;        // vetor nxn de posições da matriz
+    void **matrizCoeficientes;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
+    double *termosIndependentes;
 } SistemaL;
 
 SistemaL *alocaSistemaLinear(unsigned int n);

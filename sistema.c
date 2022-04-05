@@ -7,48 +7,48 @@
 #include "sistema.h"
 
 SistemaL *alocaSistemaLinear(unsigned int n){
-    printf("entra alocação");
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
-    SL->Dimensao = n;
-    SL->VetorM = (double *)malloc((sizeof(double *)*n));
-    SL->Mcoeficientes = (double **)malloc((sizeof(double **)*(n*n)));
-    SL->Termos_Independentes = (double *)malloc((sizeof(double *)*n));
-    printf("finaliza alocação");
+    SL->dimensao = n;
+    SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
+    SL->matrizCoeficientes = NULL; // como alocar?
+    SL->termosIndependentes = (double *)malloc((sizeof(double *)*n));
     return SL;
 }
 SistemaL *criaSistemaLinear(DadosE *DE){
-    int qntVariaveis;
-    char **vtrVariaveis;
+    char **nomesVariaveis;
+    int count;
     SistemaL *sistemaLinear = NULL;
-
     sistemaLinear = alocaSistemaLinear(DE->Qnt_variaveis);
-    
-    void **derivadas,*f;
 
-    vtrVariaveis=(char **)malloc((sizeof(char **)*DE->Qnt_variaveis*4));
-    printf("linha 35");
-    for(int i=0;i<DE->Qnt_variaveis;i++){
-        sistemaLinear->VetorM[i]=DE->Ap_inicial[i];
+    nomesVariaveis=(char **)malloc((sizeof(char **)*DE->Qnt_variaveis*4));
+    for(int i = 0; i < DE->Qnt_variaveis; ++i){
+        sistemaLinear->vtrVariaveis[i]=DE->Ap_inicial[i];
     }
-    printf("linha 35");
-    f= evaluator_create(DE->Funcao);
+    
+    void *f = evaluator_create(DE->Funcao);
     assert (f);
-    evaluator_get_variables (f, &vtrVariaveis,&qntVariaveis);
-    printf("linha 35");
-    for(int i=0;i<DE->Qnt_variaveis;i++){
-       printf("entrou");
-        derivadas[i]=evaluator_derivative(f,vtrVariaveis[i]);
-        printf("%s", evaluator_get_string(derivadas[i]));
-    }
-
-    /*printf("variaveis \n");
-    printf ("  ");
-       for (int i = 0; i < DE->Qnt_variaveis; i++)
-         printf ("%s ", vtrVariaveis[i]);
-    printf ("\n");*/
+    evaluator_get_variables (f, &nomesVariaveis,&count);
     
-    // TO DO CRIAR SISTEMA COM VALOROEES
-
+    
+    for(int i = 0; i < count; i++){
+        printf ("%s ", nomesVariaveis[i]);
+    }
+    
+    // Cria vetor de derivadas
+    void **t = (void *)malloc((sizeof(void *)*count));
+    for(int i = 0; i < count; i++){
+        t[i] = evaluator_derivative(f, nomesVariaveis[i]);
+        printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
+    }
+    // Cria matriz Hess
+    void *(*A)[count] = malloc(sizeof(int[count][count]));
+    for(int i = 0; i < count; i++){
+        for(int j = 0; j < count; j++){
+            A[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
+            printf("Deriva 2 i:%d j:%d == %s",i,j,evaluator_get_string(A[i][j]));
+        }
+        
+    }
     /*
     void *derivadas;
     passar apinicial -> M 
