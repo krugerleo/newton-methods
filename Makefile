@@ -3,9 +3,12 @@ nomeAula=newtonMethdods
 
 all: $(nomeAula)
 
-$(nomeAula): main.o dados.o sistema.o
-	gcc -o $(nomeAula) main.o dados.o sistema.o -I/usr/local/include -L/usr/local/lib -lmatheval $(parametrosCompilacao)
+$(nomeAula): main.o dados.o sistema.o metodos.o
+	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o -I/usr/local/include -L/usr/local/lib -lmatheval $(parametrosCompilacao)
 
+
+metodos.o: metodos.h metodos.c
+	gcc -c metodos.c $(parametrosCompilacao)
 
 dados.o: dados.h dados.c
 	gcc -c dados.c $(parametrosCompilacao)

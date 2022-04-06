@@ -57,5 +57,6 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         }
     }
 
+
     return sistemaLinear;
 }
