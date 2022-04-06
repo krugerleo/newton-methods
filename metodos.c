@@ -58,13 +58,13 @@ void newtonNormal(SistemaL *SL, DadosE *DE){
     }  
     max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
     matriz  = montamatriz(SL,DE); 
-    /*for (int i=0; i<DE->Qnt_variaveis;i++) {
-        for (int j=0; j<DE->Qnt_variaveis;j++) {
-            printf("%lf ", matriz[i][j]);
-        }
-    printf("\n"); // para pular linha quando terminar a coluna
-    }*/
-   
+        /*for (int i=0; i<DE->Qnt_variaveis;i++) {
+            for (int j=0; j<DE->Qnt_variaveis;j++) {
+                printf("%lf ", matriz[i][j]);
+            }
+        printf("\n"); // para pular linha quando terminar a coluna
+        }*/
+    
       
     printf("max retornado igual = %lf\n",max);
 } 
