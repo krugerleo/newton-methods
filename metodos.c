@@ -31,7 +31,7 @@ double **montamatriz(SistemaL *SL){
                     //  'Dimensão de F -> int',
                     //  'Vetor nomes variaveis -> (x1,x2, ..., xn)')
                     //  'Valor de uma variavel xn -> double (ap inicial);
-            matrizAux[i][j]=evaluator_evaluate(SL->matrizHessiana[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
+            matrizAux[i][j] = evaluator_evaluate(SL->matrizHessiana[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
             printf("%lf\t",matrizAux[i][j]);
         }
         printf("\n");
@@ -49,7 +49,7 @@ double *montaDeltaF(double **matrizValores, SistemaL *SL){
         deltaAux[i]=evaluator_evaluate(SL->vtrDerivadas[i],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);
         printf("\nValor calculado: %lf\n",deltaAux[i]);
     }
-    
+    return deltaAux;
 }
 
 double calculoNormaDelta(double *delta, int n){
@@ -74,11 +74,9 @@ void newtonNormal(SistemaL *SL, DadosE *DE){
         matrizValores[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
     
-
-    
     max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
     matrizValores  = montamatriz(SL); 
-    delta=montaDeltaF(matrizValores,SL);    
+    delta = montaDeltaF(matrizValores,SL);    
       
 
 } 
