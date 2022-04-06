@@ -10,10 +10,9 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
     SL->dimensao = n;
     SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
-    printf("%ld",(void***)(sizeof(void *)*n*n));
-    SL->matrizCoeficientes = (double **) malloc(sizeof(double *)*n);// NÃO ESTA FUNCIONANDO
-    for(int i=0; i<n;i++){
-        SL->matrizCoeficientes[i]=(double *) malloc(sizeof(double)*n);
+    SL->matrizHessiana = (void ***) malloc( sizeof(void **) * n);
+    for(int i = 0; i < n; i++){
+        SL->matrizHessiana[i] = (void **) malloc( sizeof(void*) * n);
     }   
     SL->termosIndependentes = (double *)malloc((sizeof(double *)*n));
     return SL;
@@ -37,33 +36,25 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     evaluator_get_variables (f, &nomesVariaveis,&count);
     
     
-    for(int i = 0; i < count; i++){
-        printf ("%s ", nomesVariaveis[i]);
-    }
+    // for(int i = 0; i < count; i++){
+    //     printf ("%s ", nomesVariaveis[i]);
+    // }
     
     // Cria vetor de derivadas
     void **t = (void *)malloc((sizeof(void *)*count));
     for(int i = 0; i < count; i++){
         t[i] = evaluator_derivative(f, nomesVariaveis[i]);
         //evaluate_evalueter
-        printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
+        // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
     // Cria matriz Hess
-    // void *(*A)[count] = malloc(sizeof(int[count][count]));
-    printf("antes do for \n");
-    
     for(int i = 0; i < count; i++){
         for(int j = 0; j < count; j++){
-            // ###### PRINT DEBUG, IMPRIME ENDEREÇOS MAS ESTÁ ESTRANHO
-            printf("lalala\n %p,[%d][%d]\n",&sistemaLinear->matrizCoeficientes[i][j],i,j );
-            // ###### SEG FAULT QUANDO TENTA INSERIR O VALOR
-            //scanf("%lf", &(sistemaLinear->matrizCoeficientes[i][j]));
-            sistemaLinear->matrizCoeficientes[i][j]=0.0;
             // derivada segunda
-            // sistemaLinear->matrizCoeficientes[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
+            // printf("\n %p,[%d][%d]\n",&sistemaLinear->matrizHessiana[i][j],i,j );
+            sistemaLinear->matrizHessiana[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
             // printf("\n%s\n",evaluator_get_string(A[i][j]));
         }
-        
     }
 
     return sistemaLinear;
