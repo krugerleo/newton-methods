@@ -19,26 +19,25 @@ double calculaNorma(double *X,int n){
 double **montamatriz(SistemaL *SL, DadosE *DE){
 
     double **matrizAux;
-    int count;
-    int n = DE->Qnt_variaveis;
-    char **nomesVariaveis=(char **)malloc((sizeof(char **)*DE->Qnt_variaveis*4));
-    void *f = evaluator_create(DE->Funcao);
-    assert (f);
-
-    matrizAux = (double **) malloc( sizeof(double **) * n);
-    for(int i = 0; i < n; i++){
-        matrizAux[i] = (double *) malloc( sizeof(double*) * n);
+    
+    matrizAux = (double **) malloc( sizeof(double **) * SL->dimensao);
+    for(int i = 0; i < SL->dimensao; i++){
+        matrizAux[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
   
 
     // Get nomes variaveis with matheval
-    evaluator_get_variables (f, &nomesVariaveis,&count);
+    // evaluator_get_variables (f, &SL->nomesVariaveis,&count);
     //evaluator_evaluate(hessiana[i][j],n,vtr,apiicial,)
    
 
     for(int i =0;i<DE->Qnt_variaveis;i++){
         for(int j =0;j<DE->Qnt_variaveis;j++){
-            matrizAux[i][j]=evaluator_evaluate(f,count,nomesVariaveis,&DE->Ap_inicial[j]);
+            //Evaluator('Função derivada dupla de F -> evaluator',
+                    //  'Dimensão de F -> int',
+                    //  'Vetor nomes variaveis -> (x1,x2, ..., xn)')
+                    //  'Valor de uma variavel xn -> double (ap inicial);
+            matrizAux[i][j]=evaluator_evaluate(SL->matrizHessiana[i][j],SL->dimensao,SL->nomesVariaveis,&SL->vtrVariaveis[j]);
         }
     }
    
@@ -48,16 +47,16 @@ double **montamatriz(SistemaL *SL, DadosE *DE){
 
 void newtonNormal(SistemaL *SL, DadosE *DE){
     double max;
-    double **matriz;
+    double **matrizValores;
     double *delta;
     
-    matriz  = (double **) malloc( sizeof(double **) * SL->dimensao);
+    matrizValores  = (double **) malloc( sizeof(double **) * SL->dimensao);
     delta   = (double *) malloc( sizeof(double *) * SL->dimensao);
     for(int i = 0; i < SL->dimensao; i++){
-        matriz[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
+        matrizValores[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
     max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
-    matriz  = montamatriz(SL,DE); 
+    matrizValores  = montamatriz(SL,DE); 
         /*for (int i=0; i<DE->Qnt_variaveis;i++) {
             for (int j=0; j<DE->Qnt_variaveis;j++) {
                 printf("%lf ", matriz[i][j]);
