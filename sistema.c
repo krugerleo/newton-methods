@@ -14,16 +14,16 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     for(int i = 0; i < n; i++){
         SL->matrizHessiana[i] = (void **) malloc( sizeof(void*) * n);
     }   
-    SL->termosIndependentes = (double *)malloc((sizeof(double *)*n));
+    SL->vtrDerivadas = (void *)malloc((sizeof(void *)*n));
+    SL->nomesVariaveis=(char **)malloc((sizeof(char **)*n*4));
     return SL;
 }
 SistemaL *criaSistemaLinear(DadosE *DE){
 
-    char **nomesVariaveis;
     int count;
     SistemaL *sistemaLinear;
     sistemaLinear = alocaSistemaLinear(DE->Qnt_variaveis);    
-    nomesVariaveis=(char **)malloc((sizeof(char **)*DE->Qnt_variaveis*4));
+    
 
     // First value to vector
     for(int i = 0; i < DE->Qnt_variaveis; ++i){
@@ -33,17 +33,12 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     void *f = evaluator_create(DE->Funcao);
     assert (f);
     // Get nomes variaveis with matheval
-    evaluator_get_variables (f, &nomesVariaveis,&count);
-    
-    
-    // for(int i = 0; i < count; i++){
-    //     printf ("%s ", nomesVariaveis[i]);
-    // }
+    evaluator_get_variables (f, &sistemaLinear->nomesVariaveis,&count);
     
     // Cria vetor de derivadas
-    void **t = (void *)malloc((sizeof(void *)*count));
+    
     for(int i = 0; i < count; i++){
-        t[i] = evaluator_derivative(f, nomesVariaveis[i]);
+        sistemaLinear->vtrDerivadas[i] = evaluator_derivative(f, sistemaLinear->nomesVariaveis[i]);
         //evaluate_evalueter
         // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
@@ -52,7 +47,7 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         for(int j = 0; j < count; j++){
             // derivada segunda
             // printf("\n %p,[%d][%d]\n",&sistemaLinear->matrizHessiana[i][j],i,j );
-            sistemaLinear->matrizHessiana[i][j] = evaluator_derivative(t[i], nomesVariaveis[j]);
+            sistemaLinear->matrizHessiana[i][j] = evaluator_derivative(sistemaLinear->vtrDerivadas[i], sistemaLinear->nomesVariaveis[j]);
             // printf("\n%s\n",evaluator_get_string(A[i][j]));
         }
     }

@@ -5,7 +5,8 @@ typedef struct {
     int dimensao;   // dimensão do SL
     double *vtrVariaveis;        // vetor nxn de posições da matriz
     void ***matrizHessiana;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
-    double *termosIndependentes;
+    void **vtrDerivadas;
+    char **nomesVariaveis;
 } SistemaL;
 
 SistemaL *alocaSistemaLinear(unsigned int n);

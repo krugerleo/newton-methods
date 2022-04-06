@@ -50,14 +50,14 @@ void newtonNormal(SistemaL *SL, DadosE *DE){
     double max;
     double **matriz;
     double *delta;
-    int n = DE->Qnt_variaveis;
-    matriz = (double **) malloc( sizeof(double **) * n);
-    delta=(double *) malloc( sizeof(double *) * n);
-    for(int i = 0; i < n; i++){
-        matriz[i] = (double *) malloc( sizeof(double*) * n);
+    
+    matriz  = (double **) malloc( sizeof(double **) * SL->dimensao);
+    delta   = (double *) malloc( sizeof(double *) * SL->dimensao);
+    for(int i = 0; i < SL->dimensao; i++){
+        matriz[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
-    max=calculaNorma(DE->Ap_inicial,DE->Qnt_variaveis);
-    matriz=montamatriz(SL,DE); 
+    max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
+    matriz  = montamatriz(SL,DE); 
     /*for (int i=0; i<DE->Qnt_variaveis;i++) {
         for (int j=0; j<DE->Qnt_variaveis;j++) {
             printf("%lf ", matriz[i][j]);
