@@ -53,3 +53,5 @@ dkms.conf
 .vscode/c_cpp_properties.json
 /.idea/
 /.vscode/       
+newtonMethdods
+newtonPC
