@@ -99,7 +99,8 @@ void newton(SistemaL *SL, DadosE *DE){
 
 void calculaProximoX(SistemaL *SL){
     for (int i = 0; i < SL->dimensao; i++)
-    {
+    {   
+        // X(I+1) = X(I) + DELTA(I)
         SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
     }
     SL->matrizHessiana  = montamatriz(SL); 
