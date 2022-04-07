@@ -63,7 +63,7 @@ double calculoNormaDelta(double *delta, int n){
     
     return sqrt(soma);
 }
-void newtonNormal(SistemaL *SL){
+void newton(SistemaL *SL){
     double max;
     double normadelta;
     
@@ -82,6 +82,7 @@ void newtonNormal(SistemaL *SL){
         {
             printf("Delta %d: %lf ",(i+1),SL->delta[i]);
         }
+        calculaProximoX(SL);
         break;
         //Gauss Steps
         // gaussSteps();
@@ -92,6 +93,14 @@ void newtonNormal(SistemaL *SL){
     
 
 } 
+
+void calculaProximoX(SistemaL *SL){
+    for (int i = 0; i < SL->dimensao; i++)
+    {
+        SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
+    }
+    
+}
 
 void pivot(SistemaL *SL, int i) {
     double max = fabs(SL->matrizHessiana[i][i]);

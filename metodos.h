@@ -9,11 +9,13 @@ double *montaDeltaF(SistemaL *SL);
 
 double calculoNormaDelta(double *delta, int n);
 
-void newtonNormal(SistemaL *SL);
+void newton(SistemaL *SL);
 
 void pivot(SistemaL *SL, int i);
 
 void retrossubs(SistemaL *SL);
 
 void triang(SistemaL *SL);
+
+void calculaProximoX(SistemaL *SL);
 #endif
