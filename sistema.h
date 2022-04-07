@@ -2,11 +2,15 @@
 #define SISTEMA_H
 
 typedef struct {
-    int dimensao;   // dimensão do SL
-    double *vtrVariaveis;        // vetor nxn de posições da matriz
-    void ***matrizHessiana;       // matriz dos coeficientes do SL (vetor de ponteiros para posições de M)
-    void **vtrDerivadas;
-    char **nomesVariaveis;
+    int dimensao;                   // dimensão do SL
+    double *vtrVariaveis;           // vetor nxn de posições da matriz
+    void ***matrizHessianaEval;     // Matriz evaluator for hessiana
+    void **vtrDerivadasEval;        // Vetir evaluator for Delta F
+    char **nomesVariaveis;          // Nomes variaveis
+    double **matrizHessiana;
+    double *deltaFuncoes;
+    double *delta;
+    
 } SistemaL;
 
 SistemaL *alocaSistemaLinear(unsigned int n);

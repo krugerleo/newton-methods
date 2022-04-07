@@ -24,29 +24,30 @@ double **montamatriz(SistemaL *SL){
     for(int i = 0; i < SL->dimensao; i++){
         matrizAux[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
-    
+
     for(int i =0;i<SL->dimensao;i++){
         for(int j =0;j<SL->dimensao;j++){
             //Evaluator('Função derivada dupla de F -> evaluator',
                     //  'Dimensão de F -> int',
                     //  'Vetor nomes variaveis -> (x1,x2, ..., xn)')
                     //  'Valor de uma variavel xn -> double (ap inicial);
-            matrizAux[i][j] = evaluator_evaluate(SL->matrizHessiana[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
+            matrizAux[i][j] = evaluator_evaluate(SL->matrizHessianaEval[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
             printf("%lf\t",matrizAux[i][j]);
         }
         printf("\n");
     }
+
     
     return matrizAux;
    // double delta= //vetor da funçaõ derivadas e aplicaco a interação
 }
 
-double *montaDeltaF(double **matrizValores, SistemaL *SL){
+double *montaDeltaF( SistemaL *SL){
     
     double *deltaAux = (double *)malloc((sizeof(double *)*SL->dimensao));
     for (int i = 0; i < SL->dimensao; i++){
-        printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadas[i]),(i+1),SL->vtrVariaveis[i]);
-        deltaAux[i]=evaluator_evaluate(SL->vtrDerivadas[i],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);
+        printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadasEval[i]),(i+1),SL->vtrVariaveis[i]);
+        deltaAux[i] = (-1.0) * evaluator_evaluate(SL->vtrDerivadasEval[i],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);
         printf("\nValor calculado: %lf\n",deltaAux[i]);
     }
     return deltaAux;
@@ -62,21 +63,77 @@ double calculoNormaDelta(double *delta, int n){
     
     return sqrt(soma);
 }
-void newtonNormal(SistemaL *SL, DadosE *DE){
+void newtonNormal(SistemaL *SL){
     double max;
-    double **matrizValores;
-    double *delta;
     double normadelta;
     
-    matrizValores  = (double **) malloc( sizeof(double **) * SL->dimensao);
-    delta   = (double *) malloc( sizeof(double *) * SL->dimensao);
-    for(int i = 0; i < SL->dimensao; i++){
-        matrizValores[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
-    }  
+    
     
     max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
-    matrizValores  = montamatriz(SL); 
-    delta = montaDeltaF(matrizValores,SL);    
-      
+    SL->matrizHessiana  = montamatriz(SL); 
+    SL->deltaFuncoes    = montaDeltaF(SL);    
 
+    while (calculoNormaDelta(SL->deltaFuncoes,SL->dimensao) > max )
+    {
+        //Gauss
+        triang(SL);
+        retrossubs(SL);
+        for (int i = 0; i < SL->dimensao; i++)
+        {
+            printf("Delta %d: %lf ",(i+1),SL->delta[i]);
+        }
+        break;
+        //Gauss Steps
+        // gaussSteps();
+        // gaussSeidel();
+
+    }
+    
+    
+
+} 
+
+void pivot(SistemaL *SL, int i) {
+    double max = fabs(SL->matrizHessiana[i][i]);
+    int max_i = i;
+    for (int j = i+1; j < SL->dimensao; ++j) {
+            double v = fabs(SL->matrizHessiana[j][i]);
+        if (v > max) {
+            max = v;
+            max_i = j;
+        }
+    }
+    if (max_i != i) {
+        double *tmp = SL->matrizHessiana[i];
+        SL->matrizHessiana[i] = SL->matrizHessiana[max_i];
+        SL->matrizHessiana[max_i] = tmp;
+
+        double aux = SL->deltaFuncoes[i];
+        SL->deltaFuncoes[i] = SL->deltaFuncoes[max_i];
+        SL->deltaFuncoes[max_i] = aux;
+    }
+} 
+
+void retrossubs(SistemaL *SL) {
+    for (int i = SL->dimensao-1; i >=0; --i) {
+        SL->delta[i] = SL->deltaFuncoes[i];
+        for (int j = i+1; j < SL->dimensao; j++)
+            SL->delta[i] -= SL->matrizHessiana[i][j] * SL->delta[j];
+            SL->delta[i] /= SL->matrizHessiana[i][i];
+        }   
+}
+
+void triang(SistemaL *SL) {
+    for (int i = 0; i < SL->dimensao; ++i) {
+        pivot(SL, i);
+        for (int k = i+1; k < SL->dimensao; ++k) {
+            double m = SL->matrizHessiana[k][i] / SL->matrizHessiana[i][i];
+        if (isnan(m))
+            printf("ERRO: %g\n", SL->matrizHessiana[i][i]);
+        SL->matrizHessiana[k][i] = 0.0;
+        for (int j = i+1; j < SL->dimensao; ++j)
+            SL->matrizHessiana[k][j] -= SL->matrizHessiana[i][j] * m;
+        SL->deltaFuncoes[k] -= SL->deltaFuncoes[i] * m;
+        }
+    }
 } 

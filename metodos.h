@@ -5,9 +5,15 @@ double calculaNorma(double *X,int n);
 
 double **montamatriz(SistemaL *SL);
 
-double *montaDeltaF(double **matrizValores, SistemaL *SL);
+double *montaDeltaF(SistemaL *SL);
 
 double calculoNormaDelta(double *delta, int n);
 
-void newtonNormal(SistemaL *SL,DadosE *dadosEntrada);
+void newtonNormal(SistemaL *SL);
+
+void pivot(SistemaL *SL, int i);
+
+void retrossubs(SistemaL *SL);
+
+void triang(SistemaL *SL);
 #endif

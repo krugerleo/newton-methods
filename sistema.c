@@ -10,12 +10,19 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
     SL->dimensao = n;
     SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
-    SL->matrizHessiana = (void ***) malloc( sizeof(void **) * n);
+    SL->matrizHessianaEval = (void ***) malloc( sizeof(void **) * n);
     for(int i = 0; i < n; i++){
-        SL->matrizHessiana[i] = (void **) malloc( sizeof(void*) * n);
+        SL->matrizHessianaEval[i] = (void **) malloc( sizeof(void*) * n);
     }   
-    SL->vtrDerivadas = (void *)malloc((sizeof(void *)*n));
+    SL->vtrDerivadasEval = (void *)malloc((sizeof(void *)*n));
     SL->nomesVariaveis=(char **)malloc((sizeof(char **)*n*4));
+    SL->matrizHessiana  = (double **) malloc( sizeof(double **) * SL->dimensao);
+    SL->deltaFuncoes   = (double *) malloc( sizeof(double *) * SL->dimensao);
+    SL->delta      = (double *) malloc( sizeof(double *) * SL->dimensao);
+    
+    for(int i = 0; i < SL->dimensao; i++){
+        SL->matrizHessiana[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
+    }  
     return SL;
 }
 SistemaL *criaSistemaLinear(DadosE *DE){
@@ -38,7 +45,7 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     // Cria vetor de derivadas
     
     for(int i = 0; i < count; i++){
-        sistemaLinear->vtrDerivadas[i] = evaluator_derivative(f, sistemaLinear->nomesVariaveis[i]);
+        sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(f, sistemaLinear->nomesVariaveis[i]);
         //evaluate_evalueter
         // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
@@ -47,7 +54,7 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         for(int j = 0; j < count; j++){
             // derivada segunda
             // printf("\n %p,[%d][%d]\n",&sistemaLinear->matrizHessiana[i][j],i,j );
-            sistemaLinear->matrizHessiana[i][j] = evaluator_derivative(sistemaLinear->vtrDerivadas[i], sistemaLinear->nomesVariaveis[j]);
+            sistemaLinear->matrizHessianaEval[i][j] = evaluator_derivative(sistemaLinear->vtrDerivadasEval[i], sistemaLinear->nomesVariaveis[j]);
             // printf("\n%s\n",evaluator_get_string(A[i][j]));
         }
     }
