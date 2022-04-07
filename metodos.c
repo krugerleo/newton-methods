@@ -73,8 +73,11 @@ void newton(SistemaL *SL){
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL);    
 
-    while (calculoNormaDelta(SL->deltaFuncoes,SL->dimensao) > max )
-    {
+    int x = 0;
+    while (1 )
+    {   
+
+        
         //Gauss
         triang(SL);
         retrossubs(SL);
@@ -82,8 +85,14 @@ void newton(SistemaL *SL){
         {
             printf("Delta %d: %lf ",(i+1),SL->delta[i]);
         }
+        printf("\n\n%d\n",x);
+
         calculaProximoX(SL);
-        break;
+        if(x == 2){
+            break;
+        }
+            
+        x++;
         //Gauss Steps
         // gaussSteps();
         // gaussSeidel();
@@ -99,6 +108,8 @@ void calculaProximoX(SistemaL *SL){
     {
         SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
     }
+    SL->matrizHessiana  = montamatriz(SL); 
+    SL->deltaFuncoes    = montaDeltaF(SL); 
     
 }
 
