@@ -32,9 +32,9 @@ double **montamatriz(SistemaL *SL){
                     //  'Vetor nomes variaveis -> (x1,x2, ..., xn)')
                     //  'Valor de uma variavel xn -> double (ap inicial);
             matrizAux[i][j] = evaluator_evaluate(SL->matrizHessianaEval[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
-            printf("%lf\t",matrizAux[i][j]);
+            // printf("%lf\t",matrizAux[i][j]);
         }
-        printf("\n");
+        // printf("\n");
     }
 
     
@@ -46,9 +46,9 @@ double *montaDeltaF( SistemaL *SL){
     
     double *deltaAux = (double *)malloc((sizeof(double *)*SL->dimensao));
     for (int i = 0; i < SL->dimensao; i++){
-        printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadasEval[i]),(i+1),SL->vtrVariaveis[i]);
+        // printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadasEval[i]),(i+1),SL->vtrVariaveis[i]);
         deltaAux[i] = (-1.0) * evaluator_evaluate(SL->vtrDerivadasEval[i],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);
-        printf("\nValor calculado: %lf\n",deltaAux[i]);
+        // printf("\nValor calculado: %lf\n",deltaAux[i]);
     }
     return deltaAux;
 }
@@ -63,7 +63,7 @@ double calculoNormaDelta(double *delta, int n){
     
     return sqrt(soma);
 }
-void newton(SistemaL *SL){
+void newton(SistemaL *SL, DadosE *DE){
     double max;
     double normadelta;
     
@@ -73,30 +73,24 @@ void newton(SistemaL *SL){
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL);    
 
+    printf("\n%s\n",DE->Funcao);
+    printf("#Iteração\t| Newton Padrão\t| Newton Modificado\t| Newton Inexato\n");
     int x = 0;
     while (1 )
     {   
-
-        
+        printf("%d\t\t|",x);        
         //Gauss
         triang(SL);
         retrossubs(SL);
-        for (int i = 0; i < SL->dimensao; i++)
-        {
-            printf("Delta %d: %lf ",(i+1),SL->delta[i]);
-        }
-        printf("\n\n%d\n",x);
-
-        calculaProximoX(SL);
-        if(x == 2){
-            break;
-        }
-            
-        x++;
+        printf("%lf\t|", evaluator_evaluate(SL->funcao,SL->dimensao,SL->nomesVariaveis,SL->delta) );
         //Gauss Steps
+        
+        
         // gaussSteps();
         // gaussSeidel();
-
+        calculaProximoX(SL);
+        x++;
+        break;
     }
     
     

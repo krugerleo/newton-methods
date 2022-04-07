@@ -9,7 +9,7 @@ double *montaDeltaF(SistemaL *SL);
 
 double calculoNormaDelta(double *delta, int n);
 
-void newton(SistemaL *SL);
+void newton(SistemaL *SL, DadosE *DE);
 
 void pivot(SistemaL *SL, int i);
 

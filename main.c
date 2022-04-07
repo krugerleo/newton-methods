@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]){
  
   while ( (dadosEntrada = lerDados()) ) {
     sistemaLinear = criaSistemaLinear(dadosEntrada);
-    newton(sistemaLinear);
+    newton(sistemaLinear, dadosEntrada);
     free(dadosEntrada);
     free(sistemaLinear);
   }

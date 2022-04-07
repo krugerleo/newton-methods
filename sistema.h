@@ -10,6 +10,7 @@ typedef struct {
     double **matrizHessiana;
     double *deltaFuncoes;
     double *delta;
+    void *funcao;
     
 } SistemaL;
 

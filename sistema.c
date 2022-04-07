@@ -19,7 +19,7 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     SL->matrizHessiana  = (double **) malloc( sizeof(double **) * SL->dimensao);
     SL->deltaFuncoes   = (double *) malloc( sizeof(double *) * SL->dimensao);
     SL->delta      = (double *) malloc( sizeof(double *) * SL->dimensao);
-    
+    SL->funcao = (void *) malloc( sizeof(void *) );
     for(int i = 0; i < SL->dimensao; i++){
         SL->matrizHessiana[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
@@ -37,15 +37,15 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         sistemaLinear->vtrVariaveis[i]=DE->Ap_inicial[i];
     }
     // create evaluator
-    void *f = evaluator_create(DE->Funcao);
-    assert (f);
+    sistemaLinear->funcao = evaluator_create(DE->Funcao);
+    assert (sistemaLinear->funcao);
     // Get nomes variaveis with matheval
-    evaluator_get_variables (f, &sistemaLinear->nomesVariaveis,&count);
+    evaluator_get_variables (sistemaLinear->funcao, &sistemaLinear->nomesVariaveis,&count);
     
     // Cria vetor de derivadas
     
     for(int i = 0; i < count; i++){
-        sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(f, sistemaLinear->nomesVariaveis[i]);
+        sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(sistemaLinear->funcao, sistemaLinear->nomesVariaveis[i]);
         //evaluate_evalueter
         // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
