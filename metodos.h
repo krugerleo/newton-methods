@@ -7,7 +7,7 @@ double **montamatriz(SistemaL *SL);
 
 double *montaDeltaF(SistemaL *SL);
 
-double calculoNormaDelta(double *delta, int n);
+long double calculoNormaDelta(double *delta, int n);
 
 void newton(SistemaL *SL, DadosE *DE);
 

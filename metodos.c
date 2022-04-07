@@ -53,8 +53,8 @@ double *montaDeltaF( SistemaL *SL){
     return deltaAux;
 }
 
-double calculoNormaDelta(double *delta, int n){
-    double soma,quadrado;
+long double calculoNormaDelta(double *delta, int n){
+    long double soma,quadrado;
     soma=0;
     for(int i = 0;i<n;i++){
         quadrado = delta[i]*delta[i];
@@ -63,34 +63,45 @@ double calculoNormaDelta(double *delta, int n){
     
     return sqrt(soma);
 }
+
+
 void newton(SistemaL *SL, DadosE *DE){
     double max;
-    double normadelta;
+    long double normaDeltaI;
+    long double normaDeltaF;
+
     
     
-    
-    max     = calculaNorma(SL->vtrVariaveis,SL->dimensao);
+    max= calculaNorma(SL->vtrVariaveis,SL->dimensao);
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL);    
 
     printf("\n%s\n",DE->Funcao);
     printf("#Iteração\t| Newton Padrão\t| Newton Modificado\t| Newton Inexato\n");
     int x = 0;
-    while (1 )
-    {   
+    normaDeltaI=15;
+    normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
+    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){   
+        for(int k = 0; k< SL->dimensao;k++){
+            printf("VAllores de Delta  = %lf ",SL->delta[k]);
+        }
+        printf("\n");
         printf("%d\t\t|",x);        
         //Gauss
         triang(SL);
         retrossubs(SL);
-        printf("%lf\t|", evaluator_evaluate(SL->funcao,SL->dimensao,SL->nomesVariaveis,SL->delta) );
+      
+       // printf("NORMA DELTA %Lf\n",normaDeltaI);
+        printf("%lf\t|\n", evaluator_evaluate(SL->funcao,SL->dimensao,SL->nomesVariaveis,SL->delta) );
         //Gauss Steps
         
         
         // gaussSteps();
         // gaussSeidel();
         calculaProximoX(SL);
+        normaDeltaI=calculoNormaDelta(SL->delta,SL->dimensao);
+        normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
         x++;
-        break;
     }
     
     

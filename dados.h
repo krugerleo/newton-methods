@@ -7,7 +7,7 @@ typedef struct {
     int Qnt_variaveis;
     char *Funcao;
     double *Ap_inicial;
-    long double *Tole_epsilon;
+    long double Tole_epsilon;
     int *Max_interacao;
 } DadosE;
 
