@@ -1,11 +1,15 @@
 FLAGS	= -L /lib64 -lm
 LIBS	= -lmatheval
-nomeAula=newtonMethdods
+nomeAula=newtonPC
 
 all: $(nomeAula)
 
-$(nomeAula): main.o dados.o sistema.o metodos.o
-	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o -I/usr/local/include -L/usr/local/lib $(LIBS) $(FLAGS)
+$(nomeAula): main.o dados.o sistema.o metodos.o utils.o
+	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o utils.o -I/usr/local/include -L/usr/local/lib $(LIBS) $(FLAGS)
+
+
+utils.o: utils.c utils.h
+	gcc -c utils.c $(FLAGS)
 
 
 metodos.o: metodos.h metodos.c

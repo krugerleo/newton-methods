@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <math.h>
 #include <matheval.h>
+#include "utils.h"
 #include "dados.h"
 #include "sistema.h"
 #include "metodos.h"
@@ -97,37 +98,55 @@ void newton(SistemaL *SL, DadosE *DE){
     double max;
     long double normaDeltaI;
     long double normaDeltaF;
+
+    double sistemaTempo;
+    double gaussTempo;
+    double gstepsTempo;
+    double gseidelTempo;
     //double *respostaGauss;
     //respostaGauss = (double **) malloc( sizeof(double **) * SL->dimensao);
     SistemaL *sistemaAux;
+    sistemaTempo=timestamp();
     sistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);    
     //fazer um vetor que guarda respostas
     max= calculaNorma(SL->vtrVariaveis,SL->dimensao);
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL);    
-
+    sistemaTempo=timestamp()-sistemaTempo;
     printf("\n%s\n",DE->Funcao);
-    printf("#Iteração\t| Newton Padrão\t| Newton Modificado\t| Newton Inexato\n");
+    printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     int x = 0;
     normaDeltaI=15;
     normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     sistemaAux=SL;
     //printf("1 ---- NORMA DE DELTA = %LF e NORMA DE DELTAI %LF \n", normaDeltaF,normaDeltaI);
-    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){       
+    while ( (normaDeltaF > DE->Tole_epsilon) ||  (normaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
-        //triang(sistemaAux);
-        //retrossubs(sistemaAux);
+        gaussTempo=timestamp();
+        triang(sistemaAux);
+        retrossubs(sistemaAux);
+        gaussTempo=timestamp() - gaussTempo;
         
-       // printf("NORMA DELTA %Lf\n",normaDeltaI);
-        printf("%1.14e\t|\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        
         //Gauss Steps
         
-        
+        gstepsTempo=timestamp();
         // gaussSteps();
+        printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        gstepsTempo=timestamp() - gstepsTempo;
+        
+        gseidelTempo=timestamp();
+        gaussSeidel(sistemaAux);
+        gseidelTempo = timestamp() - gseidelTempo;
+       // printf("NORMA DELTA %Lf\n",normaDeltaI);
+        printf("%1.14e\t\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        
+        
         // gaussSeidel();
         
-        gaussSeidel(sistemaAux);
+       
         calculaProximoX(sistemaAux);
         normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
         normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
@@ -137,37 +156,14 @@ void newton(SistemaL *SL, DadosE *DE){
         
         x++;
     }
-        
-    sistemaAux=SL;
-    normaDeltaI=15;
-    normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    x=0;
-    printf("antes do while\n");
-    printf("2 ---- NORMA DE DELTA = %LF e NORMA DE DELTAI %LF \n", normaDeltaF,normaDeltaI);
-    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){   
-        printf("entrou segundo while");
-        printf("%d\t\t|",x);        
-        //Gauss
-        triang(sistemaAux);
-        retrossubs(sistemaAux);
-        
-        // printf("NORMA DELTA %Lf\n",normaDeltaI);
-        printf("%1.14e\t\t\t|\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
-        //Gauss Steps
-        
-    
-        calculaProximoX(sistemaAux);
-        normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
-        normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
-        for(int k = 0; k< SL->dimensao;k++){
-            SL->delta[k]=0.0;
-        }
-        x++;
-        
-    }
-    
-    
+    printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempo, gstepsTempo, gseidelTempo);
+    //Usa a mesma variável pois é calculado uma vez no sistema.c
+    printf("Tempo derivadas | %1.14e\t| %1.14e\t| %1.14e \n", SL->tempoDerivadas, SL->tempoDerivadas, SL->tempoDerivadas);
+    //Usa o mesmo valor pois o sistema é montado antes dos calculos
+    printf("Tempo SL \t| %1.14e\t| %1.14e\t| %1.14e \n", sistemaTempo, sistemaTempo, sistemaTempo);    
    
+
+    x=0;
 
 } 
 

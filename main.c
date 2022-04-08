@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "dados.h"
+#include "utils.h"
 #include "sistema.h"
 #include "metodos.h"
 
