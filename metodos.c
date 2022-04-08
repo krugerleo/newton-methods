@@ -69,8 +69,8 @@ void newton(SistemaL *SL, DadosE *DE){
     double max;
     long double normaDeltaI;
     long double normaDeltaF;
-
-    //criar auxiliar para SL
+    SistemaL *sistemaAux;
+    sistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);    
     
     max= calculaNorma(SL->vtrVariaveis,SL->dimensao);
     SL->matrizHessiana  = montamatriz(SL); 
@@ -81,48 +81,67 @@ void newton(SistemaL *SL, DadosE *DE){
     int x = 0;
     normaDeltaI=15;
     normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){   
-       /* for(int k = 0; k< SL->dimensao;k++){
-            printf("VAllores de Delta antes  = %lf ",SL->delta[k]);
-            printf("\n");
-        }*/
-        
+    sistemaAux=SL;
+    printf("1 ---- NORMA DE DELTA = %LF e NORMA DE DELTAI %LF \n", normaDeltaF,normaDeltaI);
+    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
-        triang(SL);
-        retrossubs(SL);
+        triang(sistemaAux);
+        retrossubs(sistemaAux);
         
        // printf("NORMA DELTA %Lf\n",normaDeltaI);
-        printf("%1.14e\t|\n", evaluator_evaluate(SL->funcao,SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis) );
+        printf("%1.14e\t|\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         //Gauss Steps
         
         
         // gaussSteps();
         // gaussSeidel();
+        
+        calculaProximoX(sistemaAux);
+        normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
+        normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
         /*for(int k = 0; k< SL->dimensao;k++){
-            printf("VAllores de Delta depois  = %lf ",SL->delta[k]);
-            printf("\n");
+            sistemaAux->delta[k]=0.0;
         }*/
-        calculaProximoX(SL);
-        normaDeltaI=calculoNormaDelta(SL->delta,SL->dimensao);
-        normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-        /*for(int k = 0; k< SL->dimensao;k++){
+        x++;
+    }
+     printf("%1.14e \t\t\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        
+    sistemaAux=SL;
+    normaDeltaI=15;
+    normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
+    x=0;
+    printf("antes do while\n");
+    printf("2 ---- NORMA DE DELTA = %LF e NORMA DE DELTAI %LF \n", normaDeltaF,normaDeltaI);
+    while ( (normaDeltaF > DE->Tole_epsilon) &&  (normaDeltaI > DE->Tole_epsilon)){   
+        printf("entrou segundo while");
+        printf("%d\t\t|",x);        
+        //Gauss
+        triang(sistemaAux);
+        retrossubs(sistemaAux);
+        
+        // printf("NORMA DELTA %Lf\n",normaDeltaI);
+        printf("%1.14e\t\t\t|\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        //Gauss Steps
+        
+    
+        calculaProximoX(sistemaAux);
+        normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
+        normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
+        for(int k = 0; k< SL->dimensao;k++){
             SL->delta[k]=0.0;
-        }*/
+        }
         x++;
         
     }
     
-    for(int k = 0; k< SL->dimensao;k++){
-            printf("DELTA = %lf ",SL->delta[k]);
-            printf("\n");
-        }
+    
+   
 
 } 
 
 void calculaProximoX(SistemaL *SL){
-    for (int i = 0; i < SL->dimensao; i++)
-    {   
+    for (int i = 0; i < SL->dimensao; i++) {   
         // X(I+1) = X(I) + DELTA(I)
         SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
     }
