@@ -80,3 +80,14 @@ void imprimeMatriz(double **m, int tam){
 }
 
 
+void freeSistemaLinear(SistemaL *SL){
+    for(int i = 0; i < SL->dimensao; i++){
+        evaluator_destroy(SL->vtrDerivadasEval[i]);
+    }
+    for(int i = 0; i < SL->dimensao; i++){
+        for(int j = 0; j < SL->dimensao; j++){
+            evaluator_destroy(SL->matrizHessianaEval[i][j]);
+        }
+    }  
+    free(SL);
+};

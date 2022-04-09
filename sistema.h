@@ -21,5 +21,6 @@ SistemaL *criaSistemaLinear(DadosE *DE);
 
 void imprimeMatriz(double **m, int tam);
 
+void freeSistemaLinear(SistemaL *SL);
 
 #endif

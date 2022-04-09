@@ -20,8 +20,9 @@ int main(int argc, char const *argv[]){
   while ( (dadosEntrada = lerDados()) ) {
     sistemaLinear = criaSistemaLinear(dadosEntrada);
     newton(sistemaLinear, dadosEntrada);
+
     free(dadosEntrada);
-    free(sistemaLinear);
+    freeSistemaLinear(sistemaLinear);
   }
 
   printf("\nFinalizou graciosamente\n");
