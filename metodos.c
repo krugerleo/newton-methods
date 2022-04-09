@@ -104,8 +104,11 @@ void newton(SistemaL *SL, DadosE *DE){
     double gstepsTempo;
     double gseidelTempo;
 
+    // For LU
     double **matrizL;
     double **matrizU;
+    double *y;
+    y = (double *) malloc( sizeof(double *) * SL->dimensao);
     matrizL = (double **) malloc( sizeof(double **) * SL->dimensao);
     for(int i = 0; i < SL->dimensao ; i++){
         matrizL[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
@@ -135,22 +138,26 @@ void newton(SistemaL *SL, DadosE *DE){
     sistemaAux=SL;
     sistemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);    
     sistemaSteps=SL;
+    int it = 3;
     
     while ( (normaDeltaF > DE->Tole_epsilon) ||  (normaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
         gaussTempo=timestamp();
-        triang(sistemaAux);
-        retrossubs(sistemaAux);
+        eliminacaoGauss(sistemaAux);
         gaussTempo=timestamp() - gaussTempo;
         
         printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         
         //Gauss Steps
         gstepsTempo=timestamp();
-        triangLU(matrizL,matrizU,sistemaAux);   
-        // resolveLY();
-        // resolveUX();
+        if( x % it == 0 ){
+            triangLU(matrizL,matrizU,sistemaAux);   
+        }
+        
+        resolveLY(matrizL,y,sistemaAux->deltaFuncoes,sistemaAux->dimensao);
+        resolveUX(matrizU,sistemaAux->delta,y,sistemaAux->dimensao);
+
         printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         gstepsTempo=timestamp() - gstepsTempo;
         
@@ -187,50 +194,16 @@ void calculaProximoX(SistemaL *SL){
     
 }
 
-void pivot(SistemaL *SL, int i) {
-    double max = fabs(SL->matrizHessiana[i][i]);
-    int max_i = i;
-    for (int j = i+1; j < SL->dimensao; ++j) {
-            double v = fabs(SL->matrizHessiana[j][i]);
-        if (v > max) {
-            max = v;
-            max_i = j;
-        }
-    }
-    if (max_i != i) {
-        double *tmp = SL->matrizHessiana[i];
-        SL->matrizHessiana[i] = SL->matrizHessiana[max_i];
-        SL->matrizHessiana[max_i] = tmp;
-
-        double aux = SL->deltaFuncoes[i];
-        SL->deltaFuncoes[i] = SL->deltaFuncoes[max_i];
-        SL->deltaFuncoes[max_i] = aux;
-    }
-} 
-
-void retrossubs(SistemaL *SL) {
-    for (int i = SL->dimensao-1; i >=0; --i) {
-        SL->delta[i] = SL->deltaFuncoes[i];
-        for (int j = i+1; j < SL->dimensao; j++)
-            SL->delta[i] -= SL->matrizHessiana[i][j] * SL->delta[j];
-            SL->delta[i] /= SL->matrizHessiana[i][i];
-        }   
+void eliminacaoGauss(SistemaL *SL) {
+  gtriang(SL->matrizHessiana,SL->deltaFuncoes,SL->dimensao);
+  gretrossubs(SL->matrizHessiana,SL->delta,SL->deltaFuncoes,SL->dimensao);
 }
-
-void triang(SistemaL *SL) {
-    for (int i = 0; i < SL->dimensao; ++i) {
-        pivot(SL, i);
-        for (int k = i+1; k < SL->dimensao; ++k) {
-            double m = SL->matrizHessiana[k][i] / SL->matrizHessiana[i][i];
-        if (isnan(m))
-            printf("ERRO: %g\n", SL->matrizHessiana[i][i]);
-        SL->matrizHessiana[k][i] = 0.0;
-        for (int j = i+1; j < SL->dimensao; ++j)
-            SL->matrizHessiana[k][j] -= SL->matrizHessiana[i][j] * m;
-        SL->deltaFuncoes[k] -= SL->deltaFuncoes[i] * m;
-        }
-    }
-} 
+void resolveLY(double **A,double *X,double *B,int tam){
+    // gretrossubsInf(A,X,B,tam);
+};
+void resolveUX(double **A,double *X,double *B,int tam){
+    gretrossubs(A,X,B,tam);
+};
 
 void triangLU(double **L,double **U,SistemaL *SL) {
     for (int i = 0; i < SL->dimensao;   i++) {
@@ -250,4 +223,57 @@ void triangLU(double **L,double **U,SistemaL *SL) {
         L[i][i] = 1.0;
     }
 
+} 
+
+void gpivot(double **A,double *B, int tam, int i) {
+  double max = fabs(A[i][i]);
+  int max_i = i;
+  for (int j = i+1; j < tam; ++j) {
+    double v = fabs(A[j][i]);
+    if (v > max) {
+      max = v;
+      max_i = j;
+    }
+  }
+  if (max_i != i) {
+    double *tmp = A[i];
+    A[i] = A[max_i];
+    A[max_i] = tmp;
+
+    double aux = B[i];
+    B[i] = B[max_i];
+    B[max_i] = aux;
+  }
+} 
+
+void gretrossubs(double **A, double *X, double *B, int tam) {
+  for (int i = tam-1; i >=0; --i) {
+    X[i] = B[i];
+    for (int j = i+1; j < tam; j++)
+      X[i] -= A[i][j] * X[j];
+    X[i] /= A[i][i];
+  }
+}
+
+void gretrossubsInf(double **A, double *X, double *B, int tam) {
+  for (int i = 0; i < tam; i++) {
+    X[i] = B[i];
+    for (int j = i-1; j >= 0; j--)
+      X[i] -= A[i][j] * X[j];
+    X[i] /= A[i][i];
+  }
+}
+void gtriang(double **A,double *B,int tam) {
+  for (int i = 0; i < tam; ++i) {
+    gpivot(A,B,tam,i);
+    for (int k = i+1; k < tam; ++k) {
+      double m = A[k][i] / A[i][i];
+      if (isnan(m))
+        printf("ERRO: %g\n", A[i][i]);
+      A[k][i] = 0.0;
+      for (int j = i+1; j < tam; ++j)
+        A[k][j] -= A[i][j] * m;
+      B[k] -= B[i] * m;
+    }
+  }
 } 

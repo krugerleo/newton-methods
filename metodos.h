@@ -22,4 +22,12 @@ void triang(SistemaL *SL);
 void calculaProximoX(SistemaL *SL);
 
 void triangLU(double **L,double **U,SistemaL *SL);
+
+void eliminacaoGauss(SistemaL *SL);
+void gpivot(double **A,double *B, int tam, int i);
+void gretrossubs(double **A, double *X, double *B, int tam);
+void gretrossubsInf(double **A, double *X, double *B, int tam);
+void gtriang(double **A,double *B,int tam);
+void resolveLY(double **A,double *X,double *B,int tam);
+void resolveUX(double **A,double *X,double *B,int tam);
 #endif
