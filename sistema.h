@@ -19,4 +19,7 @@ SistemaL *alocaSistemaLinear(unsigned int n);
 
 SistemaL *criaSistemaLinear(DadosE *DE);
 
+void imprimeMatriz(double **m, int tam);
+
+
 #endif

@@ -103,11 +103,25 @@ void newton(SistemaL *SL, DadosE *DE){
     double gaussTempo;
     double gstepsTempo;
     double gseidelTempo;
+
+    double **matrizL;
+    double **matrizU;
+    matrizL = (double **) malloc( sizeof(double **) * SL->dimensao);
+    for(int i = 0; i < SL->dimensao ; i++){
+        matrizL[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
+    }  
+    matrizU = (double **) malloc( sizeof(double **) * SL->dimensao);
+    for(int i = 0; i < SL->dimensao; i++){
+        matrizU[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
+    }  
+    
     //double *respostaGauss;
     //respostaGauss = (double **) malloc( sizeof(double **) * SL->dimensao);
     SistemaL *sistemaAux;
+    SistemaL *sistemaSteps;
     sistemaTempo=timestamp();
     sistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);    
+    
     //fazer um vetor que guarda respostas
     max= calculaNorma(SL->vtrVariaveis,SL->dimensao);
     SL->matrizHessiana  = montamatriz(SL); 
@@ -119,7 +133,9 @@ void newton(SistemaL *SL, DadosE *DE){
     normaDeltaI=15;
     normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     sistemaAux=SL;
-    //printf("1 ---- NORMA DE DELTA = %LF e NORMA DE DELTAI %LF \n", normaDeltaF,normaDeltaI);
+    sistemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);    
+    sistemaSteps=SL;
+    
     while ( (normaDeltaF > DE->Tole_epsilon) ||  (normaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
@@ -131,28 +147,22 @@ void newton(SistemaL *SL, DadosE *DE){
         printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         
         //Gauss Steps
-        
         gstepsTempo=timestamp();
-        // gaussSteps();
+        triangLU(matrizL,matrizU,sistemaAux);   
+        // resolveLY();
+        // resolveUX();
         printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         gstepsTempo=timestamp() - gstepsTempo;
         
+        // gauss seidel
         gseidelTempo=timestamp();
         gaussSeidel(sistemaAux);
         gseidelTempo = timestamp() - gseidelTempo;
-       // printf("NORMA DELTA %Lf\n",normaDeltaI);
         printf("%1.14e\t\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
         
-        
-        // gaussSeidel();
-        
-       
         calculaProximoX(sistemaAux);
         normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
         normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
-        /*for(int k = 0; k< SL->dimensao;k++){
-            sistemaAux->delta[k]=0.0;
-        }*/
         
         x++;
     }
@@ -220,4 +230,24 @@ void triang(SistemaL *SL) {
         SL->deltaFuncoes[k] -= SL->deltaFuncoes[i] * m;
         }
     }
+} 
+
+void triangLU(double **L,double **U,SistemaL *SL) {
+    for (int i = 0; i < SL->dimensao;   i++) {
+        for (int k = i+1; k < SL->dimensao; ++k) {
+                double m = SL->matrizHessiana[k][i] / SL->matrizHessiana[i][i];
+            if (isnan(m))
+                printf("ERRO: %g\n", SL->matrizHessiana[i][i]);
+            SL->matrizHessiana[k][i] = 0.0;
+            U[k][i] = 0.0;
+            L[k][i] = m ;
+            for (int j = i+1; j < SL->dimensao; ++j){
+                SL->matrizHessiana[k][j] -= SL->matrizHessiana[i][j] * m;
+                U[k][j] = SL->matrizHessiana[k][j];
+            }        
+        }
+        U[i][i] = SL->matrizHessiana[i][i];
+        L[i][i] = 1.0;
+    }
+
 } 
