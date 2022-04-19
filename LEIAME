@@ -1,0 +1,13 @@
+Alunos: Leonardo Kruger - GRR20180130
+	Thauan Tavares - GRR20171591
+
+O programa lê a entrada padrão com a função lerDados no main.c e executa o programa no seguinte fluxo;
+	- lerDados = função para leitura da entrada conforme modelo apresentado.
+	- criaSistemaLinear = localizada no arquivo sistema.c, cria a estrutura sistemaLinear, aloca o sistemaLinear e realiza as operações necessarías(Hessiana,derivda, etc.).
+	- alocaSistemaLinear   = função para alocação da estrutura.
+	- Após isso o programa executa a função newton onde realiza a solução dos sistemas lineares utilizando os três metódos solicitados e imprime o resultado.
+	- Chama a função FreeSistemaLinear para liberar o espaço alocado e repete o processo até finalizar o arquivo de entrada.
+	
+	
+	
+	

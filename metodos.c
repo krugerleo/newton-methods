@@ -96,8 +96,15 @@ void gaussSeidel(SistemaL *SL){
 }
 void newton(SistemaL *SL, DadosE *DE){
     double max;
-    long double normaDeltaI;
-    long double normaDeltaF;
+    long double GaussnormaDeltaI;
+    long double GaussnormaDeltaF;
+
+    long double StepsnormaDeltaI;
+    long double StepsnormaDeltaF;
+
+    long double SeidelnormaDeltaI;
+    long double SeidelnormaDeltaF;
+  
 
     double sistemaTempo;
     double gaussTempo;
@@ -120,10 +127,15 @@ void newton(SistemaL *SL, DadosE *DE){
     
     //double *respostaGauss;
     //respostaGauss = (double **) malloc( sizeof(double **) * SL->dimensao);
-    SistemaL *sistemaAux;
+    SistemaL *GausssistemaAux;
+    SistemaL *StepssistemaAux;
+    SistemaL *SeidelsistemaAux;
+    
     SistemaL *sistemaSteps;
     sistemaTempo=timestamp();
-    sistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);    
+    GausssistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);
+    StepssistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);
+    SeidelsistemaAux = alocaSistemaLinear(DE->Qnt_variaveis);    
     
     //fazer um vetor que guarda respostas
     max= calculaNorma(SL->vtrVariaveis,SL->dimensao);
@@ -133,43 +145,54 @@ void newton(SistemaL *SL, DadosE *DE){
     printf("\n%s\n",DE->Funcao);
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     int x = 0;
-    normaDeltaI=15;
-    normaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    sistemaAux=SL;
+    SeidelnormaDeltaI=15;
+    SeidelnormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
+    GausssistemaAux=SL;
+    SeidelsistemaAux=SL;
+    StepssistemaAux=SL;
     sistemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);    
     sistemaSteps=SL;
     int it = 3;
     
-    while ( (normaDeltaF > DE->Tole_epsilon) ||  (normaDeltaI > DE->Tole_epsilon)){       
+    while ( (SeidelnormaDeltaF > DE->Tole_epsilon) &&  (SeidelnormaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
         gaussTempo=timestamp();
-        eliminacaoGauss(sistemaAux);
+        eliminacaoGauss(GausssistemaAux);
         gaussTempo=timestamp() - gaussTempo;
         
-        printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        printf("%1.14e\t|", evaluator_evaluate(GausssistemaAux->funcao,GausssistemaAux->dimensao,GausssistemaAux->nomesVariaveis,GausssistemaAux->vtrVariaveis) );
         
         //Gauss Steps
         gstepsTempo=timestamp();
         if( x % it == 0 ){
-            triangLU(matrizL,matrizU,sistemaAux);   
+            triangLU(matrizL,matrizU,GausssistemaAux);   
         }
         
-        resolveLY(matrizL,y,sistemaAux->deltaFuncoes,sistemaAux->dimensao);
-        resolveUX(matrizU,sistemaAux->delta,y,sistemaAux->dimensao);
+        resolveLY(matrizL,y,StepssistemaAux->deltaFuncoes,StepssistemaAux->dimensao);
+        resolveUX(matrizU,StepssistemaAux->delta,y,StepssistemaAux->dimensao);
 
-        printf("%1.14e\t|", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        printf("%1.14e\t|", evaluator_evaluate(StepssistemaAux->funcao,StepssistemaAux->dimensao,StepssistemaAux->nomesVariaveis,StepssistemaAux->vtrVariaveis) );
         gstepsTempo=timestamp() - gstepsTempo;
         
         // gauss seidel
         gseidelTempo=timestamp();
-        gaussSeidel(sistemaAux);
+        gaussSeidel(SeidelsistemaAux);
         gseidelTempo = timestamp() - gseidelTempo;
-        printf("%1.14e\t\n", evaluator_evaluate(sistemaAux->funcao,sistemaAux->dimensao,sistemaAux->nomesVariaveis,sistemaAux->vtrVariaveis) );
+        printf("%1.14e\t\n", evaluator_evaluate(SeidelsistemaAux->funcao,SeidelsistemaAux->dimensao,SeidelsistemaAux->nomesVariaveis,SeidelsistemaAux->vtrVariaveis) );
         
-        calculaProximoX(sistemaAux);
-        normaDeltaI=calculoNormaDelta(sistemaAux->delta,sistemaAux->dimensao);
-        normaDeltaF=calculoNormaDelta(sistemaAux->deltaFuncoes,sistemaAux->dimensao);
+        calculaProximoX(GausssistemaAux);
+        calculaProximoX(StepssistemaAux);
+        calculaProximoX(SeidelsistemaAux);
+
+        GaussnormaDeltaI=calculoNormaDelta(GausssistemaAux->delta,GausssistemaAux->dimensao);
+        GaussnormaDeltaF=calculoNormaDelta(GausssistemaAux->deltaFuncoes,GausssistemaAux->dimensao);
+
+        StepsnormaDeltaI=calculoNormaDelta(StepssistemaAux->delta,StepssistemaAux->dimensao);
+        StepsnormaDeltaF=calculoNormaDelta(StepssistemaAux->deltaFuncoes,StepssistemaAux->dimensao);
+       
+        SeidelnormaDeltaI=calculoNormaDelta(SeidelsistemaAux->delta,SeidelsistemaAux->dimensao);
+        SeidelnormaDeltaF=calculoNormaDelta(SeidelsistemaAux->deltaFuncoes,SeidelsistemaAux->dimensao);
         
         x++;
     }
@@ -199,7 +222,7 @@ void eliminacaoGauss(SistemaL *SL) {
   gretrossubs(SL->matrizHessiana,SL->delta,SL->deltaFuncoes,SL->dimensao);
 }
 void resolveLY(double **A,double *X,double *B,int tam){
-    // gretrossubsInf(A,X,B,tam);
+    gretrossubsInf(A,X,B,tam);
 };
 void resolveUX(double **A,double *X,double *B,int tam){
     gretrossubs(A,X,B,tam);
