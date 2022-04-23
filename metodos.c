@@ -161,8 +161,12 @@ void newton(SistemaL *SL, DadosE *DE){
         eliminacaoGauss(GausssistemaAux);
         gaussTempo=timestamp() - gaussTempo;
         
-        printf("%1.14e\t|", evaluator_evaluate(GausssistemaAux->funcao,GausssistemaAux->dimensao,GausssistemaAux->nomesVariaveis,GausssistemaAux->vtrVariaveis) );
-        
+        //LEO PQ ELE TA IMPRIMINDO O LALAL NA PRIMEIRA INTERAÇÃO? ACHO QUE É A MESMA COISA QUE TA BUGANDO O LAÇO 
+        if((GaussnormaDeltaF > DE->Tole_epsilon) || (GaussnormaDeltaI > DE->Tole_epsilon)){
+          printf("%1.14e\t|", evaluator_evaluate(GausssistemaAux->funcao,GausssistemaAux->dimensao,GausssistemaAux->nomesVariaveis,GausssistemaAux->vtrVariaveis) );
+        }else{
+          printf("  lalal \t");
+        }
         //Gauss Steps
         gstepsTempo=timestamp();
         if( x % it == 0 ){
@@ -183,7 +187,7 @@ void newton(SistemaL *SL, DadosE *DE){
         
         calculaProximoX(GausssistemaAux);
         calculaProximoX(StepssistemaAux);
-        calculaProximoX(SeidelsistemaAux);
+        //calculaProximoX(SeidelsistemaAux);
 
         GaussnormaDeltaI=calculoNormaDelta(GausssistemaAux->delta,GausssistemaAux->dimensao);
         GaussnormaDeltaF=calculoNormaDelta(GausssistemaAux->deltaFuncoes,GausssistemaAux->dimensao);
@@ -193,6 +197,8 @@ void newton(SistemaL *SL, DadosE *DE){
        
         SeidelnormaDeltaI=calculoNormaDelta(SeidelsistemaAux->delta,SeidelsistemaAux->dimensao);
         SeidelnormaDeltaF=calculoNormaDelta(SeidelsistemaAux->deltaFuncoes,SeidelsistemaAux->dimensao);
+
+        calculaProximoX(SeidelsistemaAux);
         
         x++;
     }
