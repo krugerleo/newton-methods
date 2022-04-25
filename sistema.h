@@ -4,7 +4,7 @@
 typedef struct {
     int dimensao;                   // dimensão do SL
     double tempoDerivadas;    
-    double *vtrVariaveis;           // vetor nxn de posições da matriz
+    double *vtrVariaveis;           // vetor nxn de posições da matriz Guarda aproximação inicial
     void ***matrizHessianaEval;     // Matriz evaluator for hessiana
     void **vtrDerivadasEval;        // Vetor evaluator for Delta F
     char **nomesVariaveis;          // Nomes variaveis

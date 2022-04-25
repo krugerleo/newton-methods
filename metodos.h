@@ -21,6 +21,8 @@ void triang(SistemaL *SL);
 
 void calculaProximoX(SistemaL *SL);
 
+void atualizaSistema(SistemaL *SL);
+
 void triangLU(double **L,double **U,SistemaL *SL);
 
 void eliminacaoGauss(SistemaL *SL);
