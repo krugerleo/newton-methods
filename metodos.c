@@ -130,14 +130,14 @@ void newton(SistemaL *SL, DadosE *DE){
     
     //double *respostaGauss;
     //respostaGauss = (double **) malloc( sizeof(double **) * SL->dimensao);
-    SistemaL *sitemaGauss;
-    SistemaL *sitemaSteps;
+    SistemaL *sistemaGauss;
+    SistemaL *sistemaSteps;
     SistemaL *sistemaSeidel;
     
     sistemaTempo=timestamp();
     // Aloca sistemas ()
-    sitemaGauss = alocaSistemaLinear(DE->Qnt_variaveis);
-    sitemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);
+    sistemaGauss = alocaSistemaLinear(DE->Qnt_variaveis);
+    sistemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);
     sistemaSeidel = alocaSistemaLinear(DE->Qnt_variaveis);    
     
     //fazer um vetor que guarda respostas
@@ -150,14 +150,14 @@ void newton(SistemaL *SL, DadosE *DE){
     int x = 0;
 
     gaussNormaDeltaI=15;
-    gaussNormaDeltaF=calculaNorma(SL->deltaFuncoes,SL->dimensao);
+    gaussNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     printf("primeiro inteção gauss %Lf \n",gaussNormaDeltaF);
     
     stepsNormaDeltaI=15;
-    stepsNormaDeltaF=calculaNorma(SL->deltaFuncoes,SL->dimensao);
+    stepsNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     printf("primeiro inteção steps %Lf \n",stepsNormaDeltaF);
     seidelNormaDeltaI=15;
-    seidelNormaDeltaF=calculaNorma(SL->deltaFuncoes,SL->dimensao);
+    seidelNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     printf("primeiro inteção seidel %Lf \n",seidelNormaDeltaF);
     // Copia ?
 
@@ -174,7 +174,7 @@ void newton(SistemaL *SL, DadosE *DE){
         printf("%d\t\t|",x);        
         //Gauss
         gaussTempo=timestamp();
-        eliminacaoGauss(sitemaGauss);
+        eliminacaoGauss(sistemaGauss);
         gaussTempo=timestamp() - gaussTempo;
         
         //LEO PQ ELE TA IMPRIMINDO O LALAL NA PRIMEIRA INTERAÇÃO? ACHO QUE É A MESMA COISA QUE TA BUGANDO O LAÇO 
@@ -189,14 +189,14 @@ void newton(SistemaL *SL, DadosE *DE){
         //Gauss Steps
         gstepsTempo=timestamp();
         if( x % it == 0 ){
-            atualizaSistema(sitemaSteps);
-            triangLU(matrizL,matrizU,sitemaGauss);   
+            atualizaSistema(sistemaSteps);
+            triangLU(matrizL,matrizU,sistemaGauss);   
         }
         
-        resolveLY(matrizL,y,sitemaSteps->deltaFuncoes,sitemaSteps->dimensao);
-        resolveUX(matrizU,sitemaSteps->delta,y,sitemaSteps->dimensao);
+        resolveLY(matrizL,y,sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
+        resolveUX(matrizU,sistemaSteps->delta,y,sistemaSteps->dimensao);
 
-        printf("%1.14e\t|", evaluator_evaluate(sitemaSteps->funcao,sitemaSteps->dimensao,sitemaSteps->nomesVariaveis,sitemaSteps->vtrVariaveis) );
+        printf("%1.14e\t|", evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis) );
         gstepsTempo=timestamp() - gstepsTempo;
         
         // gauss seidel
@@ -205,17 +205,17 @@ void newton(SistemaL *SL, DadosE *DE){
         gseidelTempo = timestamp() - gseidelTempo;
         printf("%1.14e\t\n", evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis) );
         
-        calculaProximoX(sitemaGauss);
-        atualizaSistema(sitemaGauss);
+        calculaProximoX(sistemaGauss);
+        atualizaSistema(sistemaGauss);
 
-        calculaProximoX(sitemaSteps);
-        atualizaSistema(sitemaSteps);
+        calculaProximoX(sistemaSteps);
+        atualizaSistema(sistemaSteps);
 
-        gaussNormaDeltaI=calculaNorma(sitemaGauss->delta,sitemaGauss->dimensao);
-        gaussNormaDeltaF=calculaNorma(sitemaGauss->deltaFuncoes,sitemaGauss->dimensao);
+        gaussNormaDeltaI=calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
+        gaussNormaDeltaF=calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
 
-        stepsNormaDeltaI=calculaNorma(sitemaSteps->delta,sitemaSteps->dimensao);
-        stepsNormaDeltaF=calculaNorma(sitemaSteps->deltaFuncoes,sitemaSteps->dimensao);
+        stepsNormaDeltaI=calculaNorma(sistemaSteps->delta,sistemaSteps->dimensao);
+        stepsNormaDeltaF=calculaNorma(sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
        
         calculaProximoX(sistemaSeidel);
         atualizaSistema(sistemaSeidel);
