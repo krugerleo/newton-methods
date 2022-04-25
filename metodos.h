@@ -29,6 +29,9 @@ void copiaSistema(SistemaL *copia, SistemaL *original);
 
 void triangLU(double **L,double **U,SistemaL *SL);
 
+int verificaParada(long double gaussNormaDeltaI, long double gaussNormaDeltaF, long double stepsNormaDeltaI,
+                long double stepsNormaDeltaF, long double seidelNormaDeltaI, long double seidelNormaDeltaF, long double epsilon);
+
 void eliminacaoGauss(SistemaL *SL);
 void gpivot(double **A,double *B, int tam, int i);
 void gretrossubs(double **A, double *X, double *B, int tam);
