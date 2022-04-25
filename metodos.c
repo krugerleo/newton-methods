@@ -160,9 +160,12 @@ void newton(SistemaL *SL, DadosE *DE){
     seidelNormaDeltaF=calculaNorma(SL->deltaFuncoes,SL->dimensao);
     printf("primeiro inteção seidel %Lf \n",seidelNormaDeltaF);
     // Copia ?
-    sitemaGauss=SL;
-    sistemaSeidel=SL;
-    sitemaSteps=SL;
+
+    copiaSistema(sistemaGauss,SL);
+    copiaSistema(sistemaSeidel,SL);
+    copiaSistema(sistemaSteps,SL);
+
+
     int it = 3;
     int teste =verificaParada(gaussNormaDeltaI,gaussNormaDeltaF,stepsNormaDeltaI,stepsNormaDeltaI,seidelNormaDeltaF,seidelNormaDeltaF,DE->Tole_epsilon);
     printf("retorno da funçaõ parada = %d \n ",teste);
@@ -175,12 +178,14 @@ void newton(SistemaL *SL, DadosE *DE){
         gaussTempo=timestamp() - gaussTempo;
         
         //LEO PQ ELE TA IMPRIMINDO O LALAL NA PRIMEIRA INTERAÇÃO? ACHO QUE É A MESMA COISA QUE TA BUGANDO O LAÇO 
-       //if((gaussNormaDeltaF > DE->Tole_epsilon) || (gaussNormaDeltaI > DE->Tole_epsilon)){
-          printf("%1.14e\t|", evaluator_evaluate(sitemaGauss->funcao,sitemaGauss->dimensao,sitemaGauss->nomesVariaveis,sitemaGauss->vtrVariaveis) );
-        /*}else{
-          printf("\n NormaDeltaF: %Lf gaussNormaDeltaI: %Lf DE->Tole_epsilon: %Lf \n",gaussNormaDeltaF,gaussNormaDeltaI,DE->Tole_epsilon);
-        //}*/
-        
+        if((gaussNormaDeltaF > DE->Tole_epsilon) || (gaussNormaDeltaI > DE->Tole_epsilon)){
+          printf("%1.14e\t|", evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis) );
+        }else{
+            printf("%1.14e\t|", evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis) );
+        //   printf("\n NormaDeltaF: %Lf gaussNormaDeltaI: %Lf DE->Tole_epsilon: %Lf \n",gaussNormaDeltaF,gaussNormaDeltaI,DE->Tole_epsilon);
+        }
+
+
         //Gauss Steps
         gstepsTempo=timestamp();
         if( x % it == 0 ){
@@ -243,6 +248,77 @@ void calculaProximoX(SistemaL *SL){
 void atualizaSistema(SistemaL *SL){
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL); 
+}
+
+void confereSistemas(SistemaL *gauss, SistemaL *steps, SistemaL *seidel){
+    printf("\nGAUSS\n");
+    printMatrix(gauss->matrizHessiana,gauss->dimensao);
+    printf("\nSTEPS\n");
+    printMatrix(steps->matrizHessiana,steps->dimensao);
+    printf("\nSEIDEL\n");
+    printMatrix(seidel->matrizHessiana,seidel->dimensao);
+}
+
+void printMatrix(double** matrix, int tam){
+    for (int row =0; row<tam; row++)
+    {
+        for(int columns=0; columns<tam; columns++)
+        {
+            printf("%p     ", &matrix[row][columns]);
+        }
+        printf("\n");
+    }
+}
+
+void copiaSistema(SistemaL *copia, SistemaL *original){
+
+    //     int dimensao;                   // dimensão do SL
+    //     double tempoDerivadas;          // ?
+    //     double *vtrVariaveis;           // vetor nxn de posições da matriz Guarda aproximação inicial
+    //     void ***matrizHessianaEval;     // Matriz evaluator for hessiana
+    //     void **vtrDerivadasEval;        // Vetor evaluator for Delta F
+    //     char **nomesVariaveis;          // Nomes variaveis
+    //     double **matrizHessiana;        // matrix hessiana com valores
+    //     double *deltaFuncoes;           // vetor valores do delta das funções 
+    //     double *delta;                  // vetor valores de delta
+    //     void *funcao;                   // eval da função
+        
+
+    // Copia dimensao
+    copia->dimensao = original->dimensao;
+    // printf("Valor C: %d O: %d EC: %p EO: %p\n",copia->dimensao, original->dimensao, &copia->dimensao, &original->dimensao);
+    // tempoDerivadas não precisa
+    // copia vtrVariaveis
+    for(int i = 0; i < original->dimensao; i++){
+        copia->vtrVariaveis[i] = original->vtrVariaveis[i];
+        // printf("Valor C[%d]: %f O: %f EC: %p EO: %p\n",i,copia->vtrVariaveis[i], original->vtrVariaveis[i], &copia->vtrVariaveis[i], &original->vtrVariaveis[i]);    
+    }
+    // copia de endereço
+    copia->matrizHessianaEval = original->matrizHessianaEval;
+    copia->vtrDerivadasEval = original->vtrDerivadasEval;
+    copia->nomesVariaveis = original->nomesVariaveis;
+    copia->vtrDerivadasEval = original->vtrDerivadasEval;
+    // Copia em endereço novo
+    for (int i = 0; i < original->dimensao; i++)
+    {
+        for (int j = 0; j < original->dimensao; j++)
+        {
+            copia->matrizHessiana[i][j] = original->matrizHessiana[i][j];
+            // printf("Valor C[%d][%d]: %f O: %f EC: %p EO: %p\n",i,j,copia->matrizHessiana[i][j], original->matrizHessiana[i][j], &copia->matrizHessiana[i][j], &original->matrizHessiana[i][j]);    
+        }
+    }
+    // Copia em endereço novo
+    for(int i = 0; i < original->dimensao; i++){
+        copia->deltaFuncoes[i] = original->deltaFuncoes[i];
+        // printf("Valor C[%d]: %f O: %f EC: %p EO: %p\n",i,copia->deltaFuncoes[i], original->deltaFuncoes[i], &copia->deltaFuncoes[i], &original->deltaFuncoes[i]);    
+    }
+    // Copia em endereço novo
+    for(int i = 0; i < original->dimensao; i++){
+        copia->delta[i] = original->delta[i];
+        // printf("Valor C[%d]: %f O: %f EC: %p EO: %p\n",i,copia->delta[i], original->delta[i], &copia->delta[i], &original->delta[i]);    
+    }
+    // Copia de endereço
+    copia->funcao = original->funcao;    
 }
 
 int verificaParada(long double gaussNormaDeltaI, long double gaussNormaDeltaF, long double stepsNormaDeltaI,
