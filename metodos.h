@@ -23,6 +23,10 @@ void calculaProximoX(SistemaL *SL);
 
 void atualizaSistema(SistemaL *SL);
 
+void confereSistemas(SistemaL *gauss, SistemaL *steps, SistemaL *seidel);
+void printMatrix(double** matrix, int tam);
+void copiaSistema(SistemaL *copia, SistemaL *original);
+
 void triangLU(double **L,double **U,SistemaL *SL);
 
 void eliminacaoGauss(SistemaL *SL);

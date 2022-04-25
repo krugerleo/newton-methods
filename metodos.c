@@ -128,14 +128,14 @@ void newton(SistemaL *SL, DadosE *DE){
     
     //double *respostaGauss;
     //respostaGauss = (double **) malloc( sizeof(double **) * SL->dimensao);
-    SistemaL *sitemaGauss;
-    SistemaL *sitemaSteps;
+    SistemaL *sistemaGauss;
+    SistemaL *sistemaSteps;
     SistemaL *sistemaSeidel;
     
     sistemaTempo=timestamp();
     // Aloca sistemas ()
-    sitemaGauss = alocaSistemaLinear(DE->Qnt_variaveis);
-    sitemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);
+    sistemaGauss = alocaSistemaLinear(DE->Qnt_variaveis);
+    sistemaSteps = alocaSistemaLinear(DE->Qnt_variaveis);
     sistemaSeidel = alocaSistemaLinear(DE->Qnt_variaveis);    
     
     //fazer um vetor que guarda respostas
@@ -149,21 +149,26 @@ void newton(SistemaL *SL, DadosE *DE){
     seidelNormaDeltaI=15;
     seidelNormalDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
     // Copia ?
-    sitemaGauss=SL;
-    sistemaSeidel=SL;
-    sitemaSteps=SL;
+    copiaSistema(sistemaGauss,SL);
+    return;
+    *sistemaGauss=*SL;
+    *sistemaSeidel=*SL;
+    *sistemaSteps=*SL;
+    
+    confereSistemas(sistemaGauss,sistemaSteps,sistemaSeidel);
+    return;
     int it = 3;
     
     while ( (seidelNormalDeltaF > DE->Tole_epsilon) &&  (seidelNormaDeltaI > DE->Tole_epsilon)){       
         printf("%d\t\t|",x);        
         //Gauss
         gaussTempo=timestamp();
-        eliminacaoGauss(sitemaGauss);
+        eliminacaoGauss(sistemaGauss);
         gaussTempo=timestamp() - gaussTempo;
         
         //LEO PQ ELE TA IMPRIMINDO O LALAL NA PRIMEIRA INTERAÇÃO? ACHO QUE É A MESMA COISA QUE TA BUGANDO O LAÇO 
         if((gaussNormaDeltaF > DE->Tole_epsilon) || (gaussNormaDeltaI > DE->Tole_epsilon)){
-          printf("%1.14e\t|", evaluator_evaluate(sitemaGauss->funcao,sitemaGauss->dimensao,sitemaGauss->nomesVariaveis,sitemaGauss->vtrVariaveis) );
+          printf("%1.14e\t|", evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis) );
         }else{
           printf("\n NormaDeltaF: %Lf gaussNormaDeltaI: %Lf DE->Tole_epsilon: %Lf \n",gaussNormaDeltaF,gaussNormaDeltaI,DE->Tole_epsilon);
         }
@@ -171,14 +176,14 @@ void newton(SistemaL *SL, DadosE *DE){
         //Gauss Steps
         gstepsTempo=timestamp();
         if( x % it == 0 ){
-            atualizaSistema(sitemaSteps);
-            triangLU(matrizL,matrizU,sitemaGauss);   
+            atualizaSistema(sistemaSteps);
+            triangLU(matrizL,matrizU,sistemaGauss);   
         }
         
-        resolveLY(matrizL,y,sitemaSteps->deltaFuncoes,sitemaSteps->dimensao);
-        resolveUX(matrizU,sitemaSteps->delta,y,sitemaSteps->dimensao);
+        resolveLY(matrizL,y,sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
+        resolveUX(matrizU,sistemaSteps->delta,y,sistemaSteps->dimensao);
 
-        printf("%1.14e\t|", evaluator_evaluate(sitemaSteps->funcao,sitemaSteps->dimensao,sitemaSteps->nomesVariaveis,sitemaSteps->vtrVariaveis) );
+        printf("%1.14e\t|", evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis) );
         gstepsTempo=timestamp() - gstepsTempo;
         
         // gauss seidel
@@ -187,16 +192,16 @@ void newton(SistemaL *SL, DadosE *DE){
         gseidelTempo = timestamp() - gseidelTempo;
         printf("%1.14e\t\n", evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis) );
         
-        calculaProximoX(sitemaGauss);
-        atualizaSistema(sitemaGauss);
+        calculaProximoX(sistemaGauss);
+        atualizaSistema(sistemaGauss);
 
-        calculaProximoX(sitemaSteps);
+        calculaProximoX(sistemaSteps);
 
-        gaussNormaDeltaI=calculoNormaDelta(sitemaGauss->delta,sitemaGauss->dimensao);
-        gaussNormaDeltaF=calculoNormaDelta(sitemaGauss->deltaFuncoes,sitemaGauss->dimensao);
+        gaussNormaDeltaI=calculoNormaDelta(sistemaGauss->delta,sistemaGauss->dimensao);
+        gaussNormaDeltaF=calculoNormaDelta(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
 
-        stepsNormaDeltaI=calculoNormaDelta(sitemaSteps->delta,sitemaSteps->dimensao);
-        stepsNormaDeltaF=calculoNormaDelta(sitemaSteps->deltaFuncoes,sitemaSteps->dimensao);
+        stepsNormaDeltaI=calculoNormaDelta(sistemaSteps->delta,sistemaSteps->dimensao);
+        stepsNormaDeltaF=calculoNormaDelta(sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
        
         seidelNormaDeltaI=calculoNormaDelta(sistemaSeidel->delta,sistemaSeidel->dimensao);
         seidelNormalDeltaF=calculoNormaDelta(sistemaSeidel->deltaFuncoes,sistemaSeidel->dimensao);
@@ -228,6 +233,30 @@ void atualizaSistema(SistemaL *SL){
     SL->deltaFuncoes    = montaDeltaF(SL); 
 }
 
+void confereSistemas(SistemaL *gauss, SistemaL *steps, SistemaL *seidel){
+    printf("\nGAUSS\n");
+    printMatrix(gauss->matrizHessiana,gauss->dimensao);
+    printf("\nSTEPS\n");
+    printMatrix(steps->matrizHessiana,steps->dimensao);
+    printf("\nSEIDEL\n");
+    printMatrix(seidel->matrizHessiana,seidel->dimensao);
+}
+
+void printMatrix(double** matrix, int tam){
+    for (int row =0; row<tam; row++)
+    {
+        for(int columns=0; columns<tam; columns++)
+        {
+            printf("%p     ", &matrix[row][columns]);
+        }
+        printf("\n");
+    }
+}
+
+void copiaSistema(SistemaL *copia, SistemaL *original){
+    copia->dimensao = original->dimensao;
+    printf("Valor C: %d O: %d EC: %p EO: %p",copia->dimensao, original->dimensao, &copia->dimensao, &original->dimensao);
+}
 int verificaParada(long double gaussNormaDeltaI, long double gaussNormaDeltaF, long double stepsNormaDeltaI,
                 long double stepsNormaDeltaF, long double seidelNormaDeltaI, long double seidelNormalDeltaF, long double epsilon){
 
