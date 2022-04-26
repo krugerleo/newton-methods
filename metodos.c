@@ -168,7 +168,7 @@ void newton(SistemaL *SL, DadosE *DE){
     int gausUltima = 1;
     int seidelUltima = 1;
     int stepsUltima = 1;
-    
+    printf("\nepisilon: %1.8Lf\n",DE->Tole_epsilon);
     printf("\n%s\n",DE->Funcao);
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
@@ -185,7 +185,7 @@ void newton(SistemaL *SL, DadosE *DE){
 
             value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
             if(isnan(value)){
-                printf("ERROR");
+                printf("ERROR\t\t\t|");
                 gausUltima = 0;
             }else{
                 printf("%1.14e\t|", value);
@@ -223,7 +223,7 @@ void newton(SistemaL *SL, DadosE *DE){
             
             value = evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis);
             if(isnan(value)){
-                printf("ERROR\n");
+                printf("ERROR\t\t\t|");
                 stepsUltima = 0;
             }else{
                 printf("%1.14e\t|", value);
@@ -253,7 +253,7 @@ void newton(SistemaL *SL, DadosE *DE){
             gseidelTempo = timestamp() - gseidelTempo;
                 value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
             if(isnan(value)){
-                printf("ERROR");
+                printf("ERROR\t\t\t|");
                 seidelUltima = 0;
             }else{
                 printf("%1.14e\t|", value);
@@ -276,7 +276,10 @@ void newton(SistemaL *SL, DadosE *DE){
         }else{
             printf("\t\t\t|" );
         }
-        printf("\n");
+        
+        printf("Norma F1: %1.8Lf Norma D1: %1.8Lf\t",gaussNormaDeltaF,gaussNormaDeltaI);
+        printf("Norma F2: %1.8Lf Norma D2: %1.8Lf\t",stepsNormaDeltaF,stepsNormaDeltaI);
+        printf("Norma F3: %1.8Lf Norma D3: %1.8Lf\n",seidelNormaDeltaF,seidelNormaDeltaI);
         x++;
     }
     printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempo, gstepsTempo, gseidelTempo);
@@ -375,11 +378,11 @@ void copiaSistema(SistemaL *copia, SistemaL *original){
 
 int verificaParada(long double normaDeltaF,int ultima, long double epsilon, int met){
     // retorna 1 para continuar ou 0 para parar
-    // if((normaDeltaF < epsilon)){
-    //     printf("metodo %d parou por deltaF\n",met);
-    // }else if((ultima == 0)){
+    
+    // if((ultima == 0)){
     //     printf("metodo %d parou por ultima\n",met);
-    // }
+    // }else if((normaDeltaF < epsilon)){
+    //     printf("metodo %d parou por deltaF\n",met);
     return !( (normaDeltaF < epsilon) ||  (ultima == 0) );
 
 }
