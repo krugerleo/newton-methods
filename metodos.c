@@ -107,6 +107,7 @@ void newton(SistemaL *SL, DadosE *DE){
     long double seidelNormaDeltaI;
     long double seidelNormaDeltaF;
   
+    double value;
 
     double sistemaTempo;
     double gaussTempo;
@@ -145,86 +146,137 @@ void newton(SistemaL *SL, DadosE *DE){
     SL->matrizHessiana  = montamatriz(SL); 
     SL->deltaFuncoes    = montaDeltaF(SL);    
     sistemaTempo=timestamp()-sistemaTempo;
-    printf("\n%s\n",DE->Funcao);
-    printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
+    
     int x = 0;
 
     gaussNormaDeltaI=15;
     gaussNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    printf("primeiro inteção gauss %Lf \n",gaussNormaDeltaF);
     
     stepsNormaDeltaI=15;
     stepsNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    printf("primeiro inteção steps %Lf \n",stepsNormaDeltaF);
+
     seidelNormaDeltaI=15;
     seidelNormaDeltaF=calculoNormaDelta(SL->deltaFuncoes,SL->dimensao);
-    printf("primeiro inteção seidel %Lf \n",seidelNormaDeltaF);
-    // Copia ?
 
+    // Copia ?
     copiaSistema(sistemaGauss,SL);
     copiaSistema(sistemaSeidel,SL);
     copiaSistema(sistemaSteps,SL);
 
 
     int it = 3;
-    int teste =verificaParada(gaussNormaDeltaI,gaussNormaDeltaF,stepsNormaDeltaI,stepsNormaDeltaI,seidelNormaDeltaF,seidelNormaDeltaF,DE->Tole_epsilon);
-    printf("retorno da funçaõ parada = %d \n ",teste);
-    while ( teste!=0){       
-        printf("primeiro inteção gauss %Lf \n",gaussNormaDeltaF);
+    int gausUltima = 1;
+    int seidelUltima = 1;
+    int stepsUltima = 1;
+    
+    printf("\n%s\n",DE->Funcao);
+    printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
+    while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
+            || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
+            || verificaParada(seidelNormaDeltaF,seidelUltima,DE->Tole_epsilon,3)) 
+            && (x < *DE->Max_interacao) ){       
         printf("%d\t\t|",x);        
-        //Gauss
-        gaussTempo=timestamp();
-        eliminacaoGauss(sistemaGauss);
-        gaussTempo=timestamp() - gaussTempo;
         
-        //LEO PQ ELE TA IMPRIMINDO O LALAL NA PRIMEIRA INTERAÇÃO? ACHO QUE É A MESMA COISA QUE TA BUGANDO O LAÇO 
-        if((gaussNormaDeltaF > DE->Tole_epsilon) || (gaussNormaDeltaI > DE->Tole_epsilon)){
-          printf("%1.14e\t|", evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis) );
-        }else{
-            printf("%1.14e\t|", evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis) );
-        //   printf("\n NormaDeltaF: %Lf gaussNormaDeltaI: %Lf DE->Tole_epsilon: %Lf \n",gaussNormaDeltaF,gaussNormaDeltaI,DE->Tole_epsilon);
-        }
+        //Gauss
+        if( (gaussNormaDeltaF > DE->Tole_epsilon) && (gausUltima > 0) ){
+            gaussTempo=timestamp();
+            eliminacaoGauss(sistemaGauss);
+            gaussTempo=timestamp() - gaussTempo;        
 
+            value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
+            if(isnan(value)){
+                printf("ERROR");
+                gausUltima = 0;
+            }else{
+                printf("%1.14e\t|", value);
+            }
+
+            gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
+            gaussNormaDeltaI = calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
+
+            calculaProximoX(sistemaGauss);
+            atualizaSistema(sistemaGauss);
+            
+            if(gausUltima == 2)
+                gausUltima = 0;                
+
+                
+            if( (gaussNormaDeltaI < DE->Tole_epsilon) && (gausUltima != 0) )
+                gausUltima = 2;
+            
+
+            
+        }else{
+            printf("\t\t\t|" );
+        }
 
         //Gauss Steps
-        gstepsTempo=timestamp();
-        if( x % it == 0 ){
-            atualizaSistema(sistemaSteps);
-            triangLU(matrizL,matrizU,sistemaGauss);   
+        if( (stepsNormaDeltaF > DE->Tole_epsilon) && (stepsUltima > 0) ){
+            gstepsTempo=timestamp();
+            if( x % it == 0 ){
+                atualizaSistema(sistemaSteps);
+                triangLU(matrizL,matrizU,sistemaSteps);   
+            }
+            
+            resolveLY(matrizL,y,sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
+            resolveUX(matrizU,sistemaSteps->delta,y,sistemaSteps->dimensao);
+            
+            value = evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis);
+            if(isnan(value)){
+                printf("ERROR\n");
+                stepsUltima = 0;
+            }else{
+                printf("%1.14e\t|", value);
+            }
+            
+            gstepsTempo=timestamp() - gstepsTempo;
+
+            stepsNormaDeltaF=calculaNorma(sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
+            stepsNormaDeltaI=calculaNorma(sistemaSteps->delta,sistemaSteps->dimensao);
+
+            calculaProximoX(sistemaSteps);
+
+            if(stepsUltima == 2)
+                stepsUltima = 0;                
+
+            if( (stepsNormaDeltaI < DE->Tole_epsilon) && (stepsUltima != 0) )
+                stepsUltima = 2;
+
+        }else{
+            printf("\t\t\t|" );
         }
-        
-        resolveLY(matrizL,y,sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
-        resolveUX(matrizU,sistemaSteps->delta,y,sistemaSteps->dimensao);
 
-        printf("%1.14e\t|", evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis) );
-        gstepsTempo=timestamp() - gstepsTempo;
-        
         // gauss seidel
-        gseidelTempo=timestamp();
-        gaussSeidel(sistemaSeidel);
-        gseidelTempo = timestamp() - gseidelTempo;
-        printf("%1.14e\t\n", evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis) );
-        
-        calculaProximoX(sistemaGauss);
-        atualizaSistema(sistemaGauss);
+        if( (seidelNormaDeltaF > DE->Tole_epsilon) && (seidelUltima > 0) ){
+            gseidelTempo=timestamp();
+            gaussSeidel(sistemaSeidel);
+            gseidelTempo = timestamp() - gseidelTempo;
+                value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
+            if(isnan(value)){
+                printf("ERROR");
+                seidelUltima = 0;
+            }else{
+                printf("%1.14e\t|", value);
+            }
+            
+            seidelNormaDeltaF=calculaNorma(sistemaSeidel->deltaFuncoes,sistemaSeidel->dimensao);
+            seidelNormaDeltaI=calculaNorma(sistemaSeidel->delta,sistemaSeidel->dimensao);
 
-        calculaProximoX(sistemaSteps);
-        atualizaSistema(sistemaSteps);
+            calculaProximoX(sistemaSeidel);
+            atualizaSistema(sistemaSeidel);
 
-        gaussNormaDeltaI=calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
-        gaussNormaDeltaF=calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
+            if(seidelUltima == 2)
+                seidelUltima = 0;                
 
-        stepsNormaDeltaI=calculaNorma(sistemaSteps->delta,sistemaSteps->dimensao);
-        stepsNormaDeltaF=calculaNorma(sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
-       
-        calculaProximoX(sistemaSeidel);
-        atualizaSistema(sistemaSeidel);
-        seidelNormaDeltaI=calculaNorma(sistemaSeidel->delta,sistemaSeidel->dimensao);
-        seidelNormaDeltaF=calculaNorma(sistemaSeidel->deltaFuncoes,sistemaSeidel->dimensao);
+            if( (seidelNormaDeltaI < DE->Tole_epsilon) && (seidelUltima != 0) ){
+                seidelUltima = 2;
+            }
+                
 
-       
-        teste =verificaParada(gaussNormaDeltaI,gaussNormaDeltaF,stepsNormaDeltaI,stepsNormaDeltaI,seidelNormaDeltaF,seidelNormaDeltaF,DE->Tole_epsilon);
-        
+        }else{
+            printf("\t\t\t|" );
+        }
+        printf("\n");
         x++;
     }
     printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempo, gstepsTempo, gseidelTempo);
@@ -321,14 +373,17 @@ void copiaSistema(SistemaL *copia, SistemaL *original){
     copia->funcao = original->funcao;    
 }
 
-int verificaParada(long double gaussNormaDeltaI, long double gaussNormaDeltaF, long double stepsNormaDeltaI,
-                long double stepsNormaDeltaF, long double seidelNormaDeltaI, long double seidelNormaDeltaF, long double epsilon){
-
-    return (gaussNormaDeltaI > epsilon) &&  (gaussNormaDeltaF > epsilon) 
-        && (stepsNormaDeltaI > epsilon) &&  (stepsNormaDeltaF > epsilon) 
-        && (seidelNormaDeltaF > epsilon) &&  (seidelNormaDeltaI > epsilon);
+int verificaParada(long double normaDeltaF,int ultima, long double epsilon, int met){
+    // retorna 1 para continuar ou 0 para parar
+    // if((normaDeltaF < epsilon)){
+    //     printf("metodo %d parou por deltaF\n",met);
+    // }else if((ultima == 0)){
+    //     printf("metodo %d parou por ultima\n",met);
+    // }
+    return !( (normaDeltaF < epsilon) ||  (ultima == 0) );
 
 }
+
 
 void eliminacaoGauss(SistemaL *SL) {
   gtriang(SL->matrizHessiana,SL->deltaFuncoes,SL->dimensao);
