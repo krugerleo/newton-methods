@@ -164,7 +164,7 @@ void newton(SistemaL *SL, DadosE *DE){
     copiaSistema(sistemaSteps,SL);
 
 
-    int it = 3;
+    int it = 2;
     int gausUltima = 1;
     int seidelUltima = 1;
     int stepsUltima = 1;
