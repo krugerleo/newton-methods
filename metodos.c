@@ -174,7 +174,7 @@ void newton(SistemaL *SL, DadosE *DE){
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
             || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
             || verificaParada(seidelNormaDeltaF,seidelUltima,DE->Tole_epsilon,3)) 
-            && (x < *DE->Max_interacao) ){       
+            && (x <= *DE->Max_interacao) ){       
         printf("%d\t\t|",x);        
         
         //Gauss
@@ -213,7 +213,7 @@ void newton(SistemaL *SL, DadosE *DE){
         //Gauss Steps
         if( (stepsNormaDeltaF > DE->Tole_epsilon) && (stepsUltima > 0) ){
             gstepsTempo=timestamp();
-            if( x % it == 0 ){
+            if( (x % it == 0) ){
                 atualizaSistema(sistemaSteps);
                 triangLU(matrizL,matrizU,sistemaSteps);   
             }
@@ -276,7 +276,7 @@ void newton(SistemaL *SL, DadosE *DE){
         }else{
             printf("\t\t\t|" );
         }
-        
+
         printf("Norma F1: %1.8Lf Norma D1: %1.8Lf\t",gaussNormaDeltaF,gaussNormaDeltaI);
         printf("Norma F2: %1.8Lf Norma D2: %1.8Lf\t",stepsNormaDeltaF,stepsNormaDeltaI);
         printf("Norma F3: %1.8Lf Norma D3: %1.8Lf\n",seidelNormaDeltaF,seidelNormaDeltaI);
@@ -400,6 +400,14 @@ void resolveUX(double **A,double *X,double *B,int tam){
 };
 
 void triangLU(double **L,double **U,SistemaL *SL) {
+    for (int i = 0; i < SL->dimensao; i++)
+    {
+        for (int j = 0; j < SL->dimensao; j++)
+        {
+            U[i][j] = SL->matrizHessiana[i][j];
+        }
+    }
+    
     for (int i = 0; i < SL->dimensao;   i++) {
         for (int k = i+1; k < SL->dimensao; ++k) {
                 double m = SL->matrizHessiana[k][i] / SL->matrizHessiana[i][i];

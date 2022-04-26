@@ -67,7 +67,7 @@ SistemaL *criaSistemaLinear(DadosE *DE){
 }
 
 void imprimeMatriz(double **m, int tam){
-    printf("Matriz\n    ");
+    printf("\nMatriz\n    ");
     for (int i = 0; i < tam; i++)
     {
         for (int j = 0; j < tam; j++)
