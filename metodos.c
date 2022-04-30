@@ -36,6 +36,7 @@ double **montamatriz(SistemaL *SL){
                     //  'Valor de uma variavel xn -> double (ap inicial);
            // matrizAux[i][j] = evaluator_evaluate(SL->matrizHessianaEval[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
             // printf("%lf\t",matrizAux[i][j]);
+           matrizAux[i][j] = rosenbrock_dxdy(i,j,SL->vtrVariaveis,SL->dimensao);
         }
         // printf("\n");
     }
@@ -55,6 +56,7 @@ double *montaDeltaF( SistemaL *SL){
     }
     return deltaAux;
 }
+
 
 long double calculoNormaDelta(double *delta, int n){
     long double soma,quadrado;
@@ -172,7 +174,11 @@ void newton(SistemaL *SL, DadosE *DE){
     int stepsUltima = 1;
     printf("\nepisilon: %1.8Lf\n",DE->Tole_epsilon);
     printf("\n%s\n",DE->Funcao);
-  //  printf("\ngauss NormaDElta = %Lf\n", gaussNormaDeltaF);
+    for(int i =0;i<=DE->Qnt_variaveis;i++ ){
+        printf("Delta funcoes[%d] = %lf \n",i,SL->deltaFuncoes[i]);
+        printf("Delta [%d] = %lf \n",i,SL->delta[i]);
+
+    }
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
             || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
@@ -187,14 +193,14 @@ void newton(SistemaL *SL, DadosE *DE){
             gaussTempo=timestamp() - gaussTempo;        
 
             //value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
-            value = rosenbrock(sistemaGauss->deltaFuncoes,SL->dimensao);
+            value = rosenbrock(sistemaGauss->delta,SL->dimensao);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 gausUltima = 0;
             }else{
                 printf("%1.14e\t|", value);
             }
-
+    
             gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
             gaussNormaDeltaI = calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
 
@@ -304,7 +310,7 @@ void newton(SistemaL *SL, DadosE *DE){
 void calculaProximoX(SistemaL *SL){
     for (int i = 0; i < SL->dimensao; i++) {   
         // X(I+1) = X(I) + DELTA(I)
-        SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
+        SL->vtrDerivadasEval[i] = SL->vtrDerivadasEval[i] + SL->delta[i];
     }   
 }
 void atualizaSistema(SistemaL *SL){

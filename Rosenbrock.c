@@ -22,14 +22,12 @@ double rosenbrock(double *X, int n) {
  */
 double rosenbrock_dx(int i, double *X, int n) {
     double dxi;
-    printf("Rosenbrock valor da deriavada = %lf",dxi);
     if (i == 0)
         dxi = 2*(200*X[0]*X[0]*X[0] - 200*X[0]*X[1] + X[0] - 1);
     else if (i == n-1)
         dxi = 200*(X[n-1]-X[n-2]*X[n-2]);
     else
         dxi = -200*X[i-1]*X[i-1] + 400*X[i]*X[i]*X[i] + X[i]*(202 - 400*X[i+1]) - 2;
-    printf("Rosenbrock valor da deriavada = %lf",dxi);
     return dxi;
 }
 

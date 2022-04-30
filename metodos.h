@@ -7,6 +7,7 @@ double **montamatriz(SistemaL *SL);
 
 double *montaDeltaF(SistemaL *SL);
 
+
 void gaussSeidel(SistemaL *SL);
 
 long double calculoNormaDelta(double *delta, int n);
