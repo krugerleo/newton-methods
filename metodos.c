@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <matheval.h>
+
+#include <likwid.h>
 #include "utils.h"
 #include "dados.h"
 #include "sistema.h"
 #include "metodos.h"
+#include "Rosenbrock.h"
 
 double calculaNorma(double *X,int n){
     double max=fabs(X[0]);
@@ -32,7 +34,7 @@ double **montamatriz(SistemaL *SL){
                     //  'Dimensão de F -> int',
                     //  'Vetor nomes variaveis -> (x1,x2, ..., xn)')
                     //  'Valor de uma variavel xn -> double (ap inicial);
-            matrizAux[i][j] = evaluator_evaluate(SL->matrizHessianaEval[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
+           // matrizAux[i][j] = evaluator_evaluate(SL->matrizHessianaEval[i][j],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);        
             // printf("%lf\t",matrizAux[i][j]);
         }
         // printf("\n");
@@ -44,11 +46,11 @@ double **montamatriz(SistemaL *SL){
 }
 
 double *montaDeltaF( SistemaL *SL){
-    
+
     double *deltaAux = (double *)malloc((sizeof(double *)*SL->dimensao));
     for (int i = 0; i < SL->dimensao; i++){
         // printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadasEval[i]),(i+1),SL->vtrVariaveis[i]);
-        deltaAux[i] = (-1.0) * evaluator_evaluate(SL->vtrDerivadasEval[i],SL->dimensao,SL->nomesVariaveis,SL->vtrVariaveis);
+        deltaAux[i] = (-1.0) * SL->vtrDerivadasEval[i];
         // printf("\nValor calculado: %lf\n",deltaAux[i]);
     }
     return deltaAux;
@@ -143,8 +145,8 @@ void newton(SistemaL *SL, DadosE *DE){
     
     //fazer um vetor que guarda respostas
     max = calculaNorma(SL->vtrVariaveis,SL->dimensao);
-    SL->matrizHessiana  = montamatriz(SL); 
-    SL->deltaFuncoes    = montaDeltaF(SL);    
+   // SL->matrizHessiana  = montamatriz(SL); 
+    SL->deltaFuncoes  = montaDeltaF(SL);    
     sistemaTempo=timestamp()-sistemaTempo;
     
     int x = 0;
@@ -170,6 +172,7 @@ void newton(SistemaL *SL, DadosE *DE){
     int stepsUltima = 1;
     printf("\nepisilon: %1.8Lf\n",DE->Tole_epsilon);
     printf("\n%s\n",DE->Funcao);
+  //  printf("\ngauss NormaDElta = %Lf\n", gaussNormaDeltaF);
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
             || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
@@ -183,7 +186,8 @@ void newton(SistemaL *SL, DadosE *DE){
             eliminacaoGauss(sistemaGauss);
             gaussTempo=timestamp() - gaussTempo;        
 
-            value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
+            //value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
+            value = rosenbrock(sistemaGauss->deltaFuncoes,SL->dimensao);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 gausUltima = 0;
@@ -205,7 +209,7 @@ void newton(SistemaL *SL, DadosE *DE){
                 gausUltima = 2;
             
 
-            
+        
         }else{
             printf("\t\t\t|" );
         }
@@ -221,7 +225,7 @@ void newton(SistemaL *SL, DadosE *DE){
             resolveLY(matrizL,y,sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
             resolveUX(matrizU,sistemaSteps->delta,y,sistemaSteps->dimensao);
             
-            value = evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis);
+            //value = evaluator_evaluate(sistemaSteps->funcao,sistemaSteps->dimensao,sistemaSteps->nomesVariaveis,sistemaSteps->vtrVariaveis);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 stepsUltima = 0;
@@ -251,7 +255,7 @@ void newton(SistemaL *SL, DadosE *DE){
             gseidelTempo=timestamp();
             gaussSeidel(sistemaSeidel);
             gseidelTempo = timestamp() - gseidelTempo;
-                value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
+              //  value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 seidelUltima = 0;
@@ -275,11 +279,14 @@ void newton(SistemaL *SL, DadosE *DE){
 
         }else{
             printf("\t\t\t|" );
+        
         }
+        
 
         printf("Norma F1: %1.8Lf Norma D1: %1.8Lf\t",gaussNormaDeltaF,gaussNormaDeltaI);
         printf("Norma F2: %1.8Lf Norma D2: %1.8Lf\t",stepsNormaDeltaF,stepsNormaDeltaI);
         printf("Norma F3: %1.8Lf Norma D3: %1.8Lf\n",seidelNormaDeltaF,seidelNormaDeltaI);
+        
         x++;
     }
     printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempo, gstepsTempo, gseidelTempo);

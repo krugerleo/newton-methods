@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <likwid.h>
 #include "dados.h"
 #include "utils.h"
 #include "sistema.h"
@@ -22,7 +23,7 @@ int main(int argc, char const *argv[]){
     newton(sistemaLinear, dadosEntrada);
 
     free(dadosEntrada);
-    freeSistemaLinear(sistemaLinear);
+   // freeSistemaLinear(sistemaLinear);
   }
 
   printf("\nFinalizou graciosamente\n");

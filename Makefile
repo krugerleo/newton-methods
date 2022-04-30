@@ -1,12 +1,15 @@
-FLAGS	= -L /lib64 -lm
-LIBS	= -lmatheval
+FLAGS	= -L /lib64 -lm -llikwid
+
+LIK = -L${LIKWID_LIB}
 nomeAula=newtonPC
 
 all: $(nomeAula)
 
-$(nomeAula): main.o dados.o sistema.o metodos.o utils.o
-	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o utils.o -I/usr/local/include -L/usr/local/lib $(LIBS) $(FLAGS)
+$(nomeAula): main.o dados.o sistema.o metodos.o utils.o Rosenbrock.o
+	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o utils.o Rosenbrock.o -I/usr/local/include -L/usr/local/lib -L${LIK} $(FLAGS)
 
+Rosenbrock.o: Rosenbrock.c Rosenbrock.h
+	gcc -c Rosenbrock.c $(FLAGS)
 
 utils.o: utils.c utils.h
 	gcc -c utils.c $(FLAGS)

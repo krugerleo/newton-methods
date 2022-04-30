@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <matheval.h>
+#include <likwid.h>
 #include "utils.h"
 #include "dados.h"
 #include "sistema.h"
+#include "Rosenbrock.h"
 
 SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
@@ -16,12 +17,12 @@ SistemaL *alocaSistemaLinear(unsigned int n){
     for(int i = 0; i < n; i++){
         SL->matrizHessianaEval[i] = (void **) malloc( sizeof(void*) * n);
     }   
-    SL->vtrDerivadasEval = (void *)malloc((sizeof(void *)*n));
+    SL->vtrDerivadasEval = (double *)malloc((sizeof(double *)*n));
     SL->nomesVariaveis=(char **)malloc((sizeof(char **)*n*4));
     SL->matrizHessiana  = (double **) malloc( sizeof(double **) * SL->dimensao);
     SL->deltaFuncoes   = (double *) malloc( sizeof(double *) * SL->dimensao);
     SL->delta      = (double *) malloc( sizeof(double *) * SL->dimensao);
-    SL->funcao = (void *) malloc( sizeof(void *) );
+    SL->funcao ;
     for(int i = 0; i < SL->dimensao; i++){
         SL->matrizHessiana[i] = (double *) malloc( sizeof(double*) * SL->dimensao);
     }  
@@ -39,15 +40,21 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         sistemaLinear->vtrVariaveis[i]=DE->Ap_inicial[i];
     }
     // create evaluator
-    sistemaLinear->funcao = evaluator_create(DE->Funcao);
+   /* sistemaLinear->funcao = evaluator_create(DE->Funcao);
     assert (sistemaLinear->funcao);
     // Get nomes variaveis with matheval
-    evaluator_get_variables (sistemaLinear->funcao, &sistemaLinear->nomesVariaveis,&count);
+    evaluator_get_variables (sistemaLinear->funcao, &sistemaLinear->nomesVariaveis,&count);*/
+    //usa depois nos metodos para imprimir o resultado
+    //sistemaLinear->funcao=rosenbrock(sistemaLinear->vtrVariaveis,sistemaLinear->dimensao);
+    
     
     // Cria vetor de derivadas
     sistemaLinear->tempoDerivadas=timestamp();
+    count=DE->Qnt_variaveis;
     for(int i = 0; i < count; i++){
-        sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(sistemaLinear->funcao, sistemaLinear->nomesVariaveis[i]);
+        //sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(sistemaLinear->funcao, sistemaLinear->nomesVariaveis[i]);
+        sistemaLinear->vtrDerivadasEval[i] = rosenbrock_dx(i,sistemaLinear->vtrVariaveis,sistemaLinear->dimensao);
+        
         //evaluate_evalueter
         // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
@@ -57,8 +64,9 @@ SistemaL *criaSistemaLinear(DadosE *DE){
         for(int j = 0; j < count; j++){
             // derivada segunda
             // printf("\n %p,[%d][%d]\n",&sistemaLinear->matrizHessiana[i][j],i,j );
-            sistemaLinear->matrizHessianaEval[i][j] = evaluator_derivative(sistemaLinear->vtrDerivadasEval[i], sistemaLinear->nomesVariaveis[j]);
+           // sistemaLinear->matrizHessianaEval[i][j] = evaluator_derivative(sistemaLinear->vtrDerivadasEval[i], sistemaLinear->nomesVariaveis[j]);
             // printf("\n%s\n",evaluator_get_string(A[i][j]));
+            sistemaLinear->matrizHessiana[i][j]=rosenbrock_dxdy(i,j,sistemaLinear->vtrVariaveis,sistemaLinear->dimensao);
         }
     }
 
@@ -80,7 +88,7 @@ void imprimeMatriz(double **m, int tam){
 }
 
 
-void freeSistemaLinear(SistemaL *SL){
+/*void freeSistemaLinear(SistemaL *SL){
     for(int i = 0; i < SL->dimensao; i++){
         evaluator_destroy(SL->vtrDerivadasEval[i]);
     }
@@ -90,4 +98,4 @@ void freeSistemaLinear(SistemaL *SL){
         }
     }  
     free(SL);
-};
+};*/
