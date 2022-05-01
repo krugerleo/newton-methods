@@ -174,11 +174,13 @@ void newton(SistemaL *SL, DadosE *DE){
     int stepsUltima = 1;
     printf("\nepisilon: %1.8Lf\n",DE->Tole_epsilon);
     printf("\n%s\n",DE->Funcao);
-    for(int i =0;i<=DE->Qnt_variaveis;i++ ){
+   /* for(int i =0;i<=DE->Qnt_variaveis;i++ ){
         printf("Delta funcoes[%d] = %lf \n",i,SL->deltaFuncoes[i]);
         printf("Delta [%d] = %lf \n",i,SL->delta[i]);
+        printf("vtrDerivadas [%d] = %lf \n",i,SL->vtrDerivadasEval[i]);
+        
 
-    }
+    }*/
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
             || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
@@ -193,7 +195,7 @@ void newton(SistemaL *SL, DadosE *DE){
             gaussTempo=timestamp() - gaussTempo;        
 
             //value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
-            value = rosenbrock(sistemaGauss->delta,SL->dimensao);
+            value = rosenbrock(sistemaGauss->vtrVariaveis,SL->dimensao);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 gausUltima = 0;
@@ -404,6 +406,9 @@ int verificaParada(long double normaDeltaF,int ultima, long double epsilon, int 
 void eliminacaoGauss(SistemaL *SL) {
   gtriang(SL->matrizHessiana,SL->deltaFuncoes,SL->dimensao);
   gretrossubs(SL->matrizHessiana,SL->delta,SL->deltaFuncoes,SL->dimensao);
+  for(int i =0 ; i<SL->dimensao;i++){
+   //   printf("\n\nvalor do delta[%d] = %lf\n",i,SL->delta[i]);
+  }
 }
 void resolveLY(double **A,double *X,double *B,int tam){
     gretrossubsInf(A,X,B,tam);
