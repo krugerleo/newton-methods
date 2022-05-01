@@ -195,19 +195,21 @@ void newton(SistemaL *SL, DadosE *DE){
             gaussTempo=timestamp() - gaussTempo;        
 
             //value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
-            value = rosenbrock(sistemaGauss->vtrVariaveis,SL->dimensao);
+            value = rosenbrock(sistemaGauss->vtrVariaveis,sistemaGauss->dimensao);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 gausUltima = 0;
             }else{
                 printf("%1.14e\t|", value);
             }
-    
-            gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
-            gaussNormaDeltaI = calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
 
             calculaProximoX(sistemaGauss);
             atualizaSistema(sistemaGauss);
+
+            gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
+            gaussNormaDeltaI = calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
+
+           
             
             if(gausUltima == 2)
                 gausUltima = 0;                
@@ -312,7 +314,7 @@ void newton(SistemaL *SL, DadosE *DE){
 void calculaProximoX(SistemaL *SL){
     for (int i = 0; i < SL->dimensao; i++) {   
         // X(I+1) = X(I) + DELTA(I)
-        SL->vtrDerivadasEval[i] = SL->vtrDerivadasEval[i] + SL->delta[i];
+        SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->vtrDerivadasEval[i];
     }   
 }
 void atualizaSistema(SistemaL *SL){
