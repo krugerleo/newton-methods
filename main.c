@@ -7,6 +7,8 @@
 #include "metodos.h"
 
 int main(int argc, char const *argv[]){
+  double Tempototal;
+  Tempototal=timestamp();
   DadosE *dadosEntrada;
   SistemaL *sistemaLinear;
   dadosEntrada = NULL;
@@ -16,7 +18,7 @@ int main(int argc, char const *argv[]){
 //  if(argv[1]!= NULL){
 //    temarq=1;
 //  }
- 
+
   while ( (dadosEntrada = lerDados()) ) {
     sistemaLinear = criaSistemaLinear(dadosEntrada);
     newton(sistemaLinear, dadosEntrada);
@@ -26,6 +28,8 @@ int main(int argc, char const *argv[]){
   }
 
   printf("\nFinalizou graciosamente\n");
+  Tempototal=timestamp()-Tempototal;
+  printf("Tempo total = %1.14e\n",Tempototal);
   return 0;
 
 }

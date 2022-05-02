@@ -168,6 +168,20 @@ void newton(SistemaL *SL, DadosE *DE){
     int gausUltima = 1;
     int seidelUltima = 1;
     int stepsUltima = 1;
+
+    double gaussTempoTotal = 0;
+    double stepsTempoTotal = 0;
+    double seidelTempoTotal = 0;
+
+    double gaussMontaHessiana;
+    double gaussTotalHessiana =0;
+    
+    double stepsMontaHessiana;
+    double stepsTotalHessiana =0;
+
+    double seidelMontaHessiana;
+    double seidelTotalHessiana =0;
+
     printf("\nepisilon: %1.8Lf\n",DE->Tole_epsilon);
     printf("\n%s\n",DE->Funcao);
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
@@ -182,7 +196,7 @@ void newton(SistemaL *SL, DadosE *DE){
             gaussTempo=timestamp();
             eliminacaoGauss(sistemaGauss);
             gaussTempo=timestamp() - gaussTempo;        
-
+            gaussTempoTotal += gaussTempo;
             value =  evaluator_evaluate(sistemaGauss->funcao,sistemaGauss->dimensao,sistemaGauss->nomesVariaveis,sistemaGauss->vtrVariaveis);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
@@ -193,10 +207,11 @@ void newton(SistemaL *SL, DadosE *DE){
 
             gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
             gaussNormaDeltaI = calculaNorma(sistemaGauss->delta,sistemaGauss->dimensao);
-
+            gaussMontaHessiana=timestamp();
             calculaProximoX(sistemaGauss);
             atualizaSistema(sistemaGauss);
-            
+            gaussMontaHessiana = timestamp()-gaussMontaHessiana;
+            gaussTotalHessiana += gaussMontaHessiana;
             if(gausUltima == 2)
                 gausUltima = 0;                
 
@@ -230,11 +245,14 @@ void newton(SistemaL *SL, DadosE *DE){
             }
             
             gstepsTempo=timestamp() - gstepsTempo;
+            stepsTempoTotal+=gstepsTempo;
 
-            stepsNormaDeltaF=calculaNorma(sistemaSteps->deltaFuncoes,sistemaSteps->dimensao);
-            stepsNormaDeltaI=calculaNorma(sistemaSteps->delta,sistemaSteps->dimensao);
-
+            stepsMontaHessiana=timestamp();
             calculaProximoX(sistemaSteps);
+            stepsMontaHessiana = timestamp()-stepsMontaHessiana;
+            stepsTotalHessiana += stepsMontaHessiana;
+
+        
 
             if(stepsUltima == 2)
                 stepsUltima = 0;                
@@ -251,7 +269,8 @@ void newton(SistemaL *SL, DadosE *DE){
             gseidelTempo=timestamp();
             gaussSeidel(sistemaSeidel);
             gseidelTempo = timestamp() - gseidelTempo;
-                value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
+            seidelTempoTotal+=gseidelTempo;
+            value = evaluator_evaluate(sistemaSeidel->funcao,sistemaSeidel->dimensao,sistemaSeidel->nomesVariaveis,sistemaSeidel->vtrVariaveis);
             if(isnan(value)){
                 printf("ERROR\t\t\t|");
                 seidelUltima = 0;
@@ -262,9 +281,14 @@ void newton(SistemaL *SL, DadosE *DE){
             seidelNormaDeltaF=calculaNorma(sistemaSeidel->deltaFuncoes,sistemaSeidel->dimensao);
             seidelNormaDeltaI=calculaNorma(sistemaSeidel->delta,sistemaSeidel->dimensao);
 
+           
+
+            seidelMontaHessiana=timestamp();
             calculaProximoX(sistemaSeidel);
             atualizaSistema(sistemaSeidel);
-
+            seidelMontaHessiana = timestamp()-seidelMontaHessiana;
+            seidelTotalHessiana += seidelMontaHessiana;
+            
             if(seidelUltima == 2)
                 seidelUltima = 0;                
 
@@ -282,13 +306,15 @@ void newton(SistemaL *SL, DadosE *DE){
         printf("Norma F3: %1.8Lf Norma D3: %1.8Lf\n",seidelNormaDeltaF,seidelNormaDeltaI);
         x++;
     }
-    printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempo, gstepsTempo, gseidelTempo);
+    printf("Tempo total \t| %1.14e\t| %1.14e\t| %1.14e  \n", gaussTempoTotal, stepsTempoTotal, seidelTempoTotal);
     //Usa a mesma variável pois é calculado uma vez no sistema.c
     printf("Tempo derivadas | %1.14e\t| %1.14e\t| %1.14e \n", SL->tempoDerivadas, SL->tempoDerivadas, SL->tempoDerivadas);
     //Usa o mesmo valor pois o sistema é montado antes dos calculos
     printf("Tempo SL \t| %1.14e\t| %1.14e\t| %1.14e \n", sistemaTempo, sistemaTempo, sistemaTempo);    
    
-
+    printf("Tempo hessiana gauss = %1.14e\n",gaussTotalHessiana);
+    printf("Tempo hessiana gauss = %1.14e\n",stepsTotalHessiana);
+    printf("Tempo hessiana gauss = %1.14e\n",seidelTotalHessiana);
     x=0;
     
 
