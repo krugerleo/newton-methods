@@ -36,7 +36,7 @@ DadosE *lerDados(){
     return DE;
 }
 
-void imprimeDados(DadosE *DE){
+/*void imprimeDados(DadosE *DE){
     printf("\nQuantidade de variaveis: %d\n",DE->Qnt_variaveis);
     printf("Função: %s\n",DE->Funcao);
     for(int i = 0; i < DE->Qnt_variaveis; ++i){
@@ -44,4 +44,4 @@ void imprimeDados(DadosE *DE){
     };
     printf("Epsilon: %Le\n",DE->Tole_epsilon);
     printf("Máximo Iterações: %d\n",*DE->Max_interacao);
-};
+};*/

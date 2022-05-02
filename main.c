@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]){
     newton(sistemaLinear, dadosEntrada);
 
     free(dadosEntrada);
-    freeSistemaLinear(sistemaLinear);
+   // freeSistemaLinear(sistemaLinear);
   }
 
   printf("\nFinalizou graciosamente\n");

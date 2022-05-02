@@ -3,7 +3,7 @@
 
 typedef struct {
     int dimensao;                   // dimensão do SL
-    double tempoDerivadas;          // ?
+    //double tempoDerivadas;          // ?
     double *vtrVariaveis;           // vetor nxn de posições da matriz Guarda aproximação inicial
     void ***matrizHessianaEval;     // Matriz evaluator for hessiana
     void **vtrDerivadasEval;        // Vetor evaluator for Delta F
@@ -19,7 +19,7 @@ SistemaL *alocaSistemaLinear(unsigned int n);
 
 SistemaL *criaSistemaLinear(DadosE *DE);
 
-void imprimeMatriz(double **m, int tam);
+//void imprimeMatriz(double **m, int tam);
 
 void freeSistemaLinear(SistemaL *SL);
 

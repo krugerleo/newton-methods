@@ -5,7 +5,7 @@ nomeAula=newtonPC
 all: $(nomeAula)
 
 $(nomeAula): main.o dados.o sistema.o metodos.o utils.o
-	gcc -o $(nomeAula) main.o dados.o sistema.o metodos.o utils.o -I/usr/local/include -L/usr/local/lib $(LIBS) $(FLAGS)
+	gcc -O3 -mavx -march=native $(nomeAula) main.o dados.o sistema.o metodos.o utils.o -I/usr/local/include -L/usr/local/lib $(LIBS) $(FLAGS)
 
 
 utils.o: utils.c utils.h

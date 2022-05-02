@@ -10,7 +10,7 @@
 SistemaL *alocaSistemaLinear(unsigned int n){
     SistemaL *SL= (SistemaL *) malloc(sizeof(SistemaL));
     SL->dimensao = n;
-    SL->tempoDerivadas=0;
+    //SL->tempoDerivadas=0;
     SL->vtrVariaveis = (double *)malloc((sizeof(double *)*n));
     SL->matrizHessianaEval = (void ***) malloc( sizeof(void **) * n);
     for(int i = 0; i < n; i++){
@@ -45,13 +45,13 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     evaluator_get_variables (sistemaLinear->funcao, &sistemaLinear->nomesVariaveis,&count);
     
     // Cria vetor de derivadas
-    sistemaLinear->tempoDerivadas=timestamp();
+    //sistemaLinear->tempoDerivadas=timestamp();
     for(int i = 0; i < count; i++){
         sistemaLinear->vtrDerivadasEval[i] = evaluator_derivative(sistemaLinear->funcao, sistemaLinear->nomesVariaveis[i]);
         //evaluate_evalueter
         // printf("\nDerivada x%d: %s\n",i,evaluator_get_string(t[i]));
     }
-    sistemaLinear->tempoDerivadas=timestamp() - sistemaLinear->tempoDerivadas;
+    //sistemaLinear->tempoDerivadas=timestamp() - sistemaLinear->tempoDerivadas;
     // Cria matriz Hess
     for(int i = 0; i < count; i++){
         for(int j = 0; j < count; j++){
@@ -66,7 +66,7 @@ SistemaL *criaSistemaLinear(DadosE *DE){
     return sistemaLinear;
 }
 
-void imprimeMatriz(double **m, int tam){
+/*void imprimeMatriz(double **m, int tam){
     printf("\nMatriz\n    ");
     for (int i = 0; i < tam; i++)
     {
@@ -77,7 +77,7 @@ void imprimeMatriz(double **m, int tam){
         printf("\n");
     }
     
-}
+}*/
 
 
 void freeSistemaLinear(SistemaL *SL){

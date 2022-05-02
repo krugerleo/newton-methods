@@ -15,6 +15,6 @@ DadosE *lerDados();
 
 DadosE *alocaDados(unsigned int n);
 
-void imprimeDados(DadosE *DE);
+//void imprimeDados(DadosE *DE);
 
 #endif
