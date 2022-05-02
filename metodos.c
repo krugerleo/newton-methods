@@ -51,7 +51,7 @@ double *montaDeltaF( SistemaL *SL){
     double *deltaAux = (double *)malloc((sizeof(double *)*SL->dimensao));
     for (int i = 0; i < SL->dimensao; i++){
         // printf("\nDerivada x%d: %s\n Valor x%d: %lf",(i+1),evaluator_get_string(SL->vtrDerivadasEval[i]),(i+1),SL->vtrVariaveis[i]);
-        deltaAux[i] = (-1.0) * SL->vtrDerivadasEval[i];
+        deltaAux[i] = (-1.0) * SL->vtrVariaveis[i];
         // printf("\nValor calculado: %lf\n",deltaAux[i]);
     }
     return deltaAux;
@@ -181,6 +181,8 @@ void newton(SistemaL *SL, DadosE *DE){
         
 
     }*/
+    gaussNormaDeltaF = calculaNorma(sistemaGauss->deltaFuncoes,sistemaGauss->dimensao);
+    printf("NORMA ANTES DO LAÇO %Lf", gaussNormaDeltaF);
     printf("#Iteração\t| Newton Padrão\t\t| Newton Modificado\t| Newton Inexato\n");
     while ( (verificaParada(gaussNormaDeltaF,gausUltima,DE->Tole_epsilon,1) 
             || verificaParada(stepsNormaDeltaF,stepsUltima,DE->Tole_epsilon,2) 
@@ -314,7 +316,7 @@ void newton(SistemaL *SL, DadosE *DE){
 void calculaProximoX(SistemaL *SL){
     for (int i = 0; i < SL->dimensao; i++) {   
         // X(I+1) = X(I) + DELTA(I)
-        SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->vtrDerivadasEval[i];
+        SL->vtrVariaveis[i] = SL->vtrVariaveis[i] + SL->delta[i];
     }   
 }
 void atualizaSistema(SistemaL *SL){
@@ -407,7 +409,7 @@ int verificaParada(long double normaDeltaF,int ultima, long double epsilon, int 
 
 void eliminacaoGauss(SistemaL *SL) {
   gtriang(SL->matrizHessiana,SL->deltaFuncoes,SL->dimensao);
-  gretrossubs(SL->matrizHessiana,SL->delta,SL->deltaFuncoes,SL->dimensao);
+  gretrossubs(SL->matrizHessiana,SL->vtrVariaveis,SL->deltaFuncoes,SL->dimensao);
   for(int i =0 ; i<SL->dimensao;i++){
    //   printf("\n\nvalor do delta[%d] = %lf\n",i,SL->delta[i]);
   }
